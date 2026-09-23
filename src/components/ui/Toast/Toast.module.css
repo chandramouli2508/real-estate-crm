@@ -1,0 +1,110 @@
+.container {
+  position: fixed;
+  bottom: var(--space-6);
+  right: var(--space-6);
+  z-index: var(--z-toast);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  pointer-events: none;
+  max-width: 360px;
+  width: calc(100vw - var(--space-8));
+}
+
+.toast {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  border: 1px solid var(--color-border);
+  pointer-events: all;
+  position: relative;
+  overflow: hidden;
+  animation: toast-in 0.25s ease both;
+}
+
+.exiting {
+  animation: toast-out 0.25s ease both;
+}
+
+/* Type accent border */
+.success { border-left: 4px solid var(--color-success); }
+.error   { border-left: 4px solid var(--color-danger);  }
+.warning { border-left: 4px solid var(--color-warning); }
+.info    { border-left: 4px solid var(--color-primary); }
+
+.toastIcon {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  margin-top: 2px;
+}
+
+.success .toastIcon { color: var(--color-success); }
+.error   .toastIcon { color: var(--color-danger);  }
+.warning .toastIcon { color: var(--color-warning); }
+.info    .toastIcon { color: var(--color-primary); }
+
+.toastContent {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.toastTitle {
+  font-size: var(--text-sm);
+  font-weight: var(--font-semibold);
+  color: var(--color-text-primary);
+}
+
+.toastMessage {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+  line-height: var(--leading-snug);
+}
+
+.dismissBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border: none;
+  background: transparent;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  padding: 0;
+  flex-shrink: 0;
+  border-radius: var(--radius-sm);
+  transition: background-color var(--transition-fast);
+}
+
+.dismissBtn:hover {
+  background-color: var(--color-surface-2);
+}
+
+/* Progress bar */
+.progressBar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 3px;
+  width: 100%;
+  transform-origin: left;
+  animation: shrink linear both;
+}
+
+.success .progressBar { background: var(--color-success); }
+.error   .progressBar { background: var(--color-danger);  }
+.warning .progressBar { background: var(--color-warning); }
+.info    .progressBar { background: var(--color-primary); }
+
+@keyframes shrink {
+  from { transform: scaleX(1); }
+  to   { transform: scaleX(0); }
+}
