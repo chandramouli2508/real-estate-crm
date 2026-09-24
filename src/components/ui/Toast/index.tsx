@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useState, useCallback, useRef, useEffect } from "react";
 import { createPortal } from "react-dom";
 import styles from "./Toast.module.css";
+import { CheckCircle2, XCircle, AlertTriangle, Info, X } from "lucide-react";
 
 export type ToastType = "success" | "error" | "warning" | "info";
 
@@ -26,30 +27,10 @@ interface ToastContextValue {
 const ToastContext = createContext<ToastContextValue | null>(null);
 
 const ICONS: Record<ToastType, React.ReactNode> = {
-  success: (
-    <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-      <circle cx="9" cy="9" r="8" fill="currentColor" opacity="0.15"/>
-      <path d="M5.5 9l2.5 2.5 4.5-5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-    </svg>
-  ),
-  error: (
-    <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-      <circle cx="9" cy="9" r="8" fill="currentColor" opacity="0.15"/>
-      <path d="M6 6l6 6M12 6l-6 6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-    </svg>
-  ),
-  warning: (
-    <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-      <circle cx="9" cy="9" r="8" fill="currentColor" opacity="0.15"/>
-      <path d="M9 6v4M9 12v1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-    </svg>
-  ),
-  info: (
-    <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-      <circle cx="9" cy="9" r="8" fill="currentColor" opacity="0.15"/>
-      <path d="M9 8v5M9 6v1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-    </svg>
-  ),
+  success: <CheckCircle2 size={18} strokeWidth={1.8} />,
+  error:   <XCircle     size={18} strokeWidth={1.8} />,
+  warning: <AlertTriangle size={18} strokeWidth={1.8} />,
+  info:    <Info          size={18} strokeWidth={1.8} />,
 };
 
 function ToastItem({ item, onDismiss }: { item: ToastItem; onDismiss: (id: string) => void }) {
@@ -78,9 +59,7 @@ function ToastItem({ item, onDismiss }: { item: ToastItem; onDismiss: (id: strin
         {item.message && <span className={styles.toastMessage}>{item.message}</span>}
       </div>
       <button className={styles.dismissBtn} onClick={handleDismiss} aria-label="Dismiss notification">
-        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-          <path d="M2 2l10 10M12 2L2 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-        </svg>
+        <X size={14} strokeWidth={2} />
       </button>
       <div
         className={styles.progressBar}

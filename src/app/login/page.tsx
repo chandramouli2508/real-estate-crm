@@ -1,8 +1,10 @@
 "use client";
 
 import React, { useState, useId } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import styles from "./login.module.css";
+import { Eye, EyeOff, AlertCircle } from "lucide-react";
 
 /* ── Field ── */
 function Field({
@@ -51,10 +53,7 @@ function Field({
       </div>
       {error && (
         <p id={`${id}-err`} className={styles.fieldError} role="alert">
-          <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
-            <circle cx="6" cy="6" r="5" stroke="currentColor" strokeWidth="1.2"/>
-            <path d="M6 4v3M6 8.5v.5" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/>
-          </svg>
+          <AlertCircle size={12} strokeWidth={2} aria-hidden="true" />
           {error}
         </p>
       )}
@@ -64,6 +63,7 @@ function Field({
 
 /* ── Page ── */
 export default function LoginPage() {
+  const router = useRouter();
   const emailId = useId();
   const passwordId = useId();
 
@@ -92,25 +92,39 @@ export default function LoginPage() {
     if (Object.keys(errs).length) { setErrors(errs); return; }
     setErrors({});
     setLoading(true);
-    // Simulate auth
-    await new Promise((r) => setTimeout(r, 1800));
-    setLoading(false);
-    setAuthError("Invalid email or password. Please try again.");
+
+    try {
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        setLoading(false);
+        setAuthError(data.error || "Invalid email or password. Please try again.");
+        return;
+      }
+
+      // Store session details
+      if (typeof window !== "undefined") {
+        localStorage.setItem("user", JSON.stringify(data.data.user));
+        localStorage.setItem("token", data.data.token);
+        document.cookie = `token=${data.data.token}; path=/; max-age=604800`;
+      }
+
+      setLoading(false);
+      router.push("/");
+    } catch (err) {
+      setLoading(false);
+      setAuthError("Failed to sign in. Please check network connection.");
+    }
   }
 
   const EyeIcon = ({ open }: { open: boolean }) =>
-    open ? (
-      <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-        <path d="M1 9s3-5.5 8-5.5S17 9 17 9s-3 5.5-8 5.5S1 9 1 9z" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round"/>
-        <circle cx="9" cy="9" r="2.5" stroke="currentColor" strokeWidth="1.4"/>
-      </svg>
-    ) : (
-      <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-        <path d="M1 9s3-5.5 8-5.5S17 9 17 9s-3 5.5-8 5.5S1 9 1 9z" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round"/>
-        <circle cx="9" cy="9" r="2.5" stroke="currentColor" strokeWidth="1.4"/>
-        <path d="M2 2l14 14" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"/>
-      </svg>
-    );
+    open
+      ? <Eye    size={18} strokeWidth={1.5} />
+      : <EyeOff size={18} strokeWidth={1.5} />;
 
   return (
     <div className={styles.page}>
@@ -194,10 +208,7 @@ export default function LoginPage() {
           {/* Auth error */}
           {authError && (
             <div className={styles.authError} role="alert">
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-                <circle cx="8" cy="8" r="7" fill="#FEE2E2" stroke="#EF4444" strokeWidth="1.2"/>
-                <path d="M8 5v4M8 10.5v.5" stroke="#EF4444" strokeWidth="1.4" strokeLinecap="round"/>
-              </svg>
+              <AlertCircle size={16} strokeWidth={1.8} aria-hidden="true" />
               {authError}
             </div>
           )}

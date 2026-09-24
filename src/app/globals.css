@@ -7,51 +7,56 @@
    Design Tokens
    ───────────────────────────────────────────────── */
 :root {
-  /* Colors — Brand */
-  --color-primary:        #2563EB;
-  --color-primary-hover:  #1D4ED8;
-  --color-primary-light:  #EFF6FF;
-  --color-primary-muted:  #BFDBFE;
+  /* Colors — Brand (Premium Indigo-Slate) */
+  --color-primary:        #4F46E5;
+  --color-primary-hover:  #4338CA;
+  --color-primary-light:  #EEF2FF;
+  --color-primary-muted:  #C7D2FE;
 
-  --color-secondary:      #7C3AED;
-  --color-secondary-hover:#6D28D9;
-  --color-secondary-light:#F5F3FF;
+  --color-secondary:      #0EA5E9;
+  --color-secondary-hover:#0284C7;
+  --color-secondary-light:#F0F9FF;
+  --color-secondary-muted:#BAE6FD;
 
   /* Colors — Semantic */
-  --color-success:        #10B981;
-  --color-success-light:  #D1FAE5;
-  --color-success-dark:   #065F46;
+  --color-success:        #059669;
+  --color-success-light:  #ECFDF5;
+  --color-success-dark:   #064E3B;
+  --color-success-muted:  #A7F3D0;
 
-  --color-warning:        #F59E0B;
-  --color-warning-light:  #FEF3C7;
-  --color-warning-dark:   #92400E;
+  --color-warning:        #D97706;
+  --color-warning-light:  #FFFBEB;
+  --color-warning-dark:   #78350F;
+  --color-warning-muted:  #FDE68A;
 
-  --color-danger:         #EF4444;
-  --color-danger-light:   #FEE2E2;
-  --color-danger-dark:    #991B1B;
+  --color-danger:         #DC2626;
+  --color-danger-light:   #FEF2F2;
+  --color-danger-dark:    #7F1D1D;
+  --color-danger-muted:   #FECACA;
 
-  --color-info:           #3B82F6;
-  --color-info-light:     #EFF6FF;
-  --color-info-dark:      #1E40AF;
+  --color-info:           #0EA5E9;
+  --color-info-light:     #F0F9FF;
+  --color-info-dark:      #0C4A6E;
+  --color-info-muted:     #BAE6FD;
 
-  /* Colors — Neutrals */
-  --color-bg:             #F9FAFB;
+  /* Colors — Neutrals (Warm Slate) */
+  --color-bg:             #F8FAFC;
   --color-surface:        #FFFFFF;
-  --color-surface-2:      #F3F4F6;
-  --color-surface-3:      #E5E7EB;
-  --color-border:         #E5E7EB;
-  --color-border-strong:  #D1D5DB;
+  --color-surface-2:      #F1F5F9;
+  --color-surface-3:      #E2E8F0;
+  --color-border:         #E2E8F0;
+  --color-border-strong:  #CBD5E1;
 
-  --color-text-primary:   #111827;
-  --color-text-secondary: #374151;
-  --color-text-muted:     #6B7280;
-  --color-text-disabled:  #9CA3AF;
+  --color-text-primary:   #0F172A;
+  --color-text-secondary: #334155;
+  --color-text-muted:     #64748B;
+  --color-text-disabled:  #94A3B8;
   --color-text-inverse:   #FFFFFF;
 
-  /* Colors — Sidebar */
+  /* Colors — Sidebar (Deep Slate) */
   --color-sidebar-bg:     #0F172A;
   --color-sidebar-text:   #94A3B8;
-  --color-sidebar-active: #FFFFFF;
+  --color-sidebar-active: #F8FAFC;
   --color-sidebar-active-bg: #1E293B;
   --color-sidebar-hover-bg:  #1E293B;
   --color-sidebar-border: #1E293B;

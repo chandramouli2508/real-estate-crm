@@ -1,11 +1,13 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { cn } from "@/lib/cn";
 import styles from "./Header.module.css";
 import { Avatar } from "@/components/ui/Avatar";
 import { Dropdown } from "@/components/ui/Dropdown";
 import { SearchInput } from "@/components/ui/SearchInput";
+import { User, Settings, LogOut, Bell, HelpCircle, ChevronDown, Menu } from "lucide-react";
 
 interface HeaderProps {
   onMenuToggle?: () => void;
@@ -13,29 +15,42 @@ interface HeaderProps {
 }
 
 function Header({ onMenuToggle, title }: HeaderProps) {
-  const [search, setSearch] = React.useState("");
+  const router = useRouter();
+  const [search, setSearch] = useState("");
+  const [userName, setUserName] = useState("Rajesh Sharma");
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const stored = localStorage.getItem("user");
+      if (stored) {
+        try {
+          const parsed = JSON.parse(stored);
+          if (parsed.name) setUserName(parsed.name);
+        } catch (_) {}
+      }
+    }
+  }, []);
+
+  function handleLogout() {
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("user");
+      localStorage.removeItem("token");
+      document.cookie = "token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+    }
+    router.push("/login");
+  }
 
   const userMenuItems = [
     {
       key: "profile",
       label: "My Profile",
-      icon: (
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-          <circle cx="8" cy="5.5" r="3" stroke="currentColor" strokeWidth="1.25"/>
-          <path d="M2 14c0-3 2.7-5 6-5s6 2 6 5" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round"/>
-        </svg>
-      ),
+      icon: <User size={15} strokeWidth={1.6} />,
       onClick: () => {},
     },
     {
       key: "account",
       label: "Account Settings",
-      icon: (
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-          <circle cx="8" cy="8" r="2" stroke="currentColor" strokeWidth="1.25"/>
-          <path d="M8 2v1M8 13v1M2 8h1M13 8h1M3.8 3.8l.7.7M11.5 11.5l.7.7M3.8 12.2l.7-.7M11.5 4.5l.7-.7" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round"/>
-        </svg>
-      ),
+      icon: <Settings size={15} strokeWidth={1.6} />,
       onClick: () => {},
     },
     { key: "div1", label: "", divider: true },
@@ -43,12 +58,8 @@ function Header({ onMenuToggle, title }: HeaderProps) {
       key: "logout",
       label: "Sign Out",
       danger: true,
-      icon: (
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-          <path d="M10 11l3-3-3-3M13 8H6M7 3H3a1 1 0 00-1 1v8a1 1 0 001 1h4" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round" strokeLinejoin="round"/>
-        </svg>
-      ),
-      onClick: () => {},
+      icon: <LogOut size={15} strokeWidth={1.6} />,
+      onClick: handleLogout,
     },
   ];
 
@@ -61,9 +72,7 @@ function Header({ onMenuToggle, title }: HeaderProps) {
             onClick={onMenuToggle}
             aria-label="Toggle navigation"
           >
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-              <path d="M3 5h14M3 10h14M3 15h14" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-            </svg>
+            <Menu size={20} strokeWidth={1.6} />
           </button>
         )}
         {title && <span className={styles.pageTitle}>{title}</span>}
@@ -83,20 +92,13 @@ function Header({ onMenuToggle, title }: HeaderProps) {
       <div className={styles.right}>
         {/* Notifications */}
         <button className={styles.iconBtn} aria-label="Notifications">
-          <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-            <path d="M10 2a6 6 0 016 6c0 4 1.5 5.5 1.5 5.5H2.5S4 12 4 8a6 6 0 016-6z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"/>
-            <path d="M8.3 16a1.8 1.8 0 003.4 0" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-          </svg>
+          <Bell size={20} strokeWidth={1.6} />
           <span className={styles.notifBadge} aria-label="3 unread notifications">3</span>
         </button>
 
         {/* Help */}
         <button className={styles.iconBtn} aria-label="Help and support">
-          <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-            <circle cx="10" cy="10" r="8" stroke="currentColor" strokeWidth="1.5"/>
-            <path d="M8 7.5C8 6.7 8.9 6 10 6s2 .7 2 1.5c0 1.5-2 1.5-2 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-            <circle cx="10" cy="14" r=".75" fill="currentColor"/>
-          </svg>
+          <HelpCircle size={20} strokeWidth={1.6} />
         </button>
 
         {/* Divider */}
@@ -106,11 +108,9 @@ function Header({ onMenuToggle, title }: HeaderProps) {
         <Dropdown
           trigger={
             <div className={styles.userTrigger}>
-              <Avatar name="Manju Kumar" size="sm" status="online" />
-              <span className={styles.userName}>Manju Kumar</span>
-              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" className={styles.chevron}>
-                <path d="M3 5l4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
+              <Avatar name={userName} size="sm" status="online" />
+              <span className={styles.userName}>{userName}</span>
+              <ChevronDown size={14} strokeWidth={1.8} className={styles.chevron} />
             </div>
           }
           items={userMenuItems}

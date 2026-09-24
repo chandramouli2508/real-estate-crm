@@ -1,0 +1,109 @@
+/* ─────────────────────────────────────────────────
+   Reusable Filter Toolbar Styles
+   ───────────────────────────────────────────────── */
+
+.toolbar {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  box-shadow: var(--shadow-sm);
+  width: 100%;
+  flex-wrap: wrap;
+}
+
+.searchSection {
+  flex: 1 1 240px;
+  min-width: 200px;
+  max-width: 380px;
+}
+
+.filtersSection {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1 1 auto;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.item {
+  flex: 1 1 130px;
+  min-width: 110px;
+  max-width: 170px;
+}
+
+.clearBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 38px;
+  padding: 0 12px;
+  background: transparent;
+  border: 1px dashed var(--color-border-strong);
+  border-radius: var(--radius-md);
+  font-size: var(--text-xs);
+  font-weight: var(--font-medium);
+  color: var(--color-text-muted);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all var(--transition-fast);
+  flex-shrink: 0;
+}
+
+.clearBtn:hover {
+  color: var(--color-danger);
+  border-color: var(--color-danger-light);
+  background: var(--color-danger-light);
+}
+
+/* ── Responsive Rules ── */
+@media (max-width: 1100px) {
+  .searchSection {
+    max-width: 100%;
+    flex-basis: 100%;
+  }
+
+  .filtersSection {
+    width: 100%;
+    justify-content: flex-start;
+  }
+}
+
+@media (max-width: 768px) {
+  .toolbar {
+    padding: 10px 12px;
+  }
+
+  .filtersSection {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+
+  .item {
+    min-width: 0;
+    max-width: 100%;
+    width: 100%;
+  }
+
+  .clearBtn {
+    grid-column: span 2;
+    justify-content: center;
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .filtersSection {
+    grid-template-columns: 1fr;
+  }
+
+  .clearBtn {
+    grid-column: span 1;
+  }
+}

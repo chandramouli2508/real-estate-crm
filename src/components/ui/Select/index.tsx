@@ -1,8 +1,9 @@
 "use client";
 
-import React from "react";
+import React, { useId } from "react";
 import { cn } from "@/lib/cn";
 import styles from "./Select.module.css";
+import { ChevronDown } from "lucide-react";
 
 export interface SelectOption {
   value: string;
@@ -24,7 +25,8 @@ const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
     { label, hint, error, options, placeholder, fullWidth = false, className, id, ...props },
     ref
   ) => {
-    const selectId = id ?? `select-${Math.random().toString(36).slice(2, 9)}`;
+    const generatedId = useId();
+    const selectId = id ?? generatedId;
 
     return (
       <div className={cn(styles.wrapper, fullWidth && styles.fullWidth)}>
@@ -57,9 +59,7 @@ const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
             ))}
           </select>
           <span className={styles.chevron} aria-hidden="true">
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-              <path d="M4 6l4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
+            <ChevronDown size={16} strokeWidth={1.6} />
           </span>
         </div>
         {error && (

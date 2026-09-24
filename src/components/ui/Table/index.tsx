@@ -1,6 +1,9 @@
+"use client";
+
 import React from "react";
 import { cn } from "@/lib/cn";
 import styles from "./Table.module.css";
+import { ArrowUp, ArrowDown, ArrowUpDown, Inbox } from "lucide-react";
 
 export interface TableColumn<T = Record<string, unknown>> {
   key: string;
@@ -22,6 +25,8 @@ export interface TableProps<T = Record<string, unknown>> {
   sortKey?: string;
   sortDir?: "asc" | "desc";
   onSort?: (key: string) => void;
+  stickyHeader?: boolean;
+  striped?: boolean;
 }
 
 function Table<T extends Record<string, unknown>>({
@@ -29,17 +34,19 @@ function Table<T extends Record<string, unknown>>({
   data,
   keyField = "id",
   loading = false,
-  emptyMessage = "No data found",
+  emptyMessage = "No data available",
   className,
   onRowClick,
   sortKey,
   sortDir,
   onSort,
+  stickyHeader = false,
+  striped = false,
 }: TableProps<T>) {
   return (
     <div className={cn(styles.wrapper, className)}>
-      <table className={styles.table}>
-        <thead>
+      <table className={cn(styles.table, striped && styles.striped)}>
+        <thead className={cn(stickyHeader && styles.stickyHeader)}>
           <tr className={styles.headerRow}>
             {columns.map((col) => (
               <th
@@ -59,72 +66,69 @@ function Table<T extends Record<string, unknown>>({
                     : undefined
                 }
               >
-                <span className={styles.thContent}>
-                  {col.title}
+                <div className={styles.thContent}>
+                  <span>{col.title}</span>
                   {col.sortable && (
                     <span className={styles.sortIcon} aria-hidden="true">
                       {sortKey === col.key ? (
                         sortDir === "asc" ? (
-                          <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-                            <path d="M6 2l4 8H2z" fill="currentColor"/>
-                          </svg>
+                          <ArrowUp size={13} strokeWidth={2} />
                         ) : (
-                          <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-                            <path d="M6 10L2 2h8z" fill="currentColor"/>
-                          </svg>
+                          <ArrowDown size={13} strokeWidth={2} />
                         )
                       ) : (
-                        <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-                          <path d="M6 2l3 4H3zM6 10L3 6h6z" fill="currentColor" opacity="0.4"/>
-                        </svg>
+                        <ArrowUpDown size={13} strokeWidth={1.5} className={styles.sortInactive} />
                       )}
                     </span>
                   )}
-                </span>
+                </div>
               </th>
             ))}
           </tr>
         </thead>
         <tbody>
-          {loading
-            ? Array.from({ length: 5 }).map((_, i) => (
-                <tr key={i} className={styles.row}>
-                  {columns.map((col) => (
-                    <td key={col.key} className={styles.td}>
-                      <span className={`${styles.skeletonCell} skeleton`} />
-                    </td>
-                  ))}
-                </tr>
-              ))
-            : data.length === 0
-            ? (
-              <tr>
-                <td colSpan={columns.length} className={styles.empty}>
-                  {emptyMessage}
-                </td>
+          {loading ? (
+            Array.from({ length: 5 }).map((_, i) => (
+              <tr key={i} className={styles.row}>
+                {columns.map((col) => (
+                  <td key={col.key} className={styles.td}>
+                    <span className={`${styles.skeletonCell} skeleton`} />
+                  </td>
+                ))}
               </tr>
-            )
-            : data.map((row, i) => (
-                <tr
-                  key={String(row[keyField] ?? i)}
-                  className={cn(styles.row, onRowClick && styles.clickable)}
-                  onClick={onRowClick ? () => onRowClick(row) : undefined}
-                >
-                  {columns.map((col) => (
-                    <td
-                      key={col.key}
-                      className={cn(
-                        styles.td,
-                        col.align && styles[`align-${col.align}`]
-                      )}
-                    >
-                      {col.render
-                        ? col.render(row[col.key], row, i)
-                        : String(row[col.key] ?? "")}
-                    </td>
-                  ))}
-                </tr>
-              ))}
+            ))
+          ) : data.length === 0 ? (
+            <tr>
+              <td colSpan={columns.length} className={styles.empty}>
+                <div className={styles.emptyStateContainer}>
+                  <Inbox size={32} strokeWidth={1.2} className={styles.emptyIcon} />
+                  <span>{emptyMessage}</span>
+                </div>
+              </td>
+            </tr>
+          ) : (
+            data.map((row, i) => (
+              <tr
+                key={String(row[keyField] ?? i)}
+                className={cn(styles.row, onRowClick && styles.clickable)}
+                onClick={onRowClick ? () => onRowClick(row) : undefined}
+              >
+                {columns.map((col) => (
+                  <td
+                    key={col.key}
+                    className={cn(
+                      styles.td,
+                      col.align && styles[`align-${col.align}`]
+                    )}
+                  >
+                    {col.render
+                      ? col.render(row[col.key], row, i)
+                      : String(row[col.key] ?? "")}
+                  </td>
+                ))}
+              </tr>
+            ))
+          )}
         </tbody>
       </table>
     </div>

@@ -1,5 +1,6 @@
 import React from "react";
 import styles from "./ErrorState.module.css";
+import { AlertCircle } from "lucide-react";
 
 export interface ErrorStateProps {
   title?: string;
@@ -15,10 +16,7 @@ function ErrorState({
   return (
     <div className={styles.wrapper} role="alert">
       <div className={styles.icon}>
-        <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
-          <circle cx="20" cy="20" r="19" stroke="currentColor" strokeWidth="1.5" />
-          <path d="M20 12v10M20 26v2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-        </svg>
+        <AlertCircle size={40} strokeWidth={1.4} />
       </div>
       <h3 className={styles.title}>{title}</h3>
       <p className={styles.message}>{message}</p>

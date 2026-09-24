@@ -1,8 +1,9 @@
 "use client";
 
-import React from "react";
+import React, { useId } from "react";
 import { cn } from "@/lib/cn";
 import styles from "./DateInput.module.css";
+import { Calendar } from "lucide-react";
 
 export interface DateInputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, "type"> {
   label?: string;
@@ -13,7 +14,8 @@ export interface DateInputProps extends Omit<React.InputHTMLAttributes<HTMLInput
 
 const DateInput = React.forwardRef<HTMLInputElement, DateInputProps>(
   ({ label, hint, error, fullWidth = false, className, id, ...props }, ref) => {
-    const inputId = id ?? `date-${Math.random().toString(36).slice(2, 9)}`;
+    const generatedId = useId();
+    const inputId = id ?? generatedId;
 
     return (
       <div className={cn(styles.wrapper, fullWidth && styles.fullWidth)}>
@@ -25,10 +27,7 @@ const DateInput = React.forwardRef<HTMLInputElement, DateInputProps>(
         )}
         <div className={styles.inputWrapper}>
           <span className={styles.icon} aria-hidden="true">
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-              <rect x="1.5" y="2.5" width="13" height="12" rx="2" stroke="currentColor" strokeWidth="1.25"/>
-              <path d="M5 1v3M11 1v3M1.5 6.5h13" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round"/>
-            </svg>
+            <Calendar size={16} strokeWidth={1.6} />
           </span>
           <input
             ref={ref}

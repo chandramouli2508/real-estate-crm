@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useId } from "react";
 import { cn } from "@/lib/cn";
 import styles from "./Input.module.css";
 
@@ -18,7 +18,8 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
     { label, hint, error, iconLeft, iconRight, fullWidth = false, className, id, ...props },
     ref
   ) => {
-    const inputId = id ?? `input-${Math.random().toString(36).slice(2, 9)}`;
+    const generatedId = useId();
+    const inputId = id ?? generatedId;
 
     return (
       <div className={cn(styles.wrapper, fullWidth && styles.fullWidth)}>

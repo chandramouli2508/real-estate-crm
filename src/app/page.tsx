@@ -7,6 +7,11 @@ import { Avatar } from "@/components/ui/Avatar";
 import { Button } from "@/components/ui/Button";
 import { StatCard } from "@/components/ui/StatCard";
 import styles from "./page.module.css";
+import {
+  Users, UserPlus, Home, CalendarCheck2, Clock,
+  Phone, MessageSquare, Plus, Building2, LayoutGrid,
+  BookOpen, ChevronRight, Globe, UserCheck, Search, Eye,
+} from "lucide-react";
 
 /* ─────────────────────────────────────────────────────────────
    SAMPLE DATA
@@ -193,89 +198,33 @@ const STAGE_BADGE: Record<string, "primary" | "info" | "secondary" | "warning" |
   Lost: "danger",
 };
 
-const SOURCE_ICON: Record<string, string> = {
-  Website: "🌐",
-  Referral: "👥",
-  "99acres": "🏠",
-  MagicBricks: "🏗️",
-  "Walk-in": "🚶",
-  "Housing.com": "🔍",
+const SOURCE_ICON_COMPONENT: Record<string, React.ReactNode> = {
+  Website: <Globe size={13} strokeWidth={1.8} />,
+  Referral: <Users size={13} strokeWidth={1.8} />,
+  "99acres": <Home size={13} strokeWidth={1.8} />,
+  MagicBricks: <Building2 size={13} strokeWidth={1.8} />,
+  "Walk-in": <UserCheck size={13} strokeWidth={1.8} />,
+  "Housing.com": <Search size={13} strokeWidth={1.8} />,
 };
 
 /* ─────────────────────────────────────────────────────────────
    SUB-COMPONENTS
    ───────────────────────────────────────────────────────────── */
 
-/* Icons */
+/* Icons — now all Lucide */
 const Icons = {
-  Leads: () => (
-    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-      <circle cx="10" cy="7" r="4" stroke="currentColor" strokeWidth="1.5"/>
-      <path d="M2 18c0-4 3.6-7 8-7s8 3 8 7" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-    </svg>
-  ),
-  NewLeads: () => (
-    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-      <circle cx="10" cy="7" r="4" stroke="currentColor" strokeWidth="1.5"/>
-      <path d="M2 18c0-4 3.6-7 8-7" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-      <path d="M15 13v4M13 15h4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-    </svg>
-  ),
-  Visit: () => (
-    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-      <path d="M3 9.5L10 3l7 6.5V17a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z" stroke="currentColor" strokeWidth="1.5"/>
-      <path d="M7 18v-7h6v7" stroke="currentColor" strokeWidth="1.5"/>
-    </svg>
-  ),
-  Bookings: () => (
-    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-      <rect x="2.5" y="3.5" width="15" height="14" rx="2" stroke="currentColor" strokeWidth="1.5"/>
-      <path d="M7 2v3M13 2v3M2.5 8h15" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-      <path d="M6 12l2 2 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-    </svg>
-  ),
-  FollowUp: () => (
-    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-      <circle cx="10" cy="10" r="8" stroke="currentColor" strokeWidth="1.5"/>
-      <path d="M10 6v4l2.5 2.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-    </svg>
-  ),
-  Phone: () => (
-    <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-      <path d="M2.5 2h2l1 3-1.5 1a9 9 0 004 4l1-1.5 3 1v2c0 .6-.5 1-1 .9C4.3 12.2 1.8 9.7 1.6 4A1 1 0 012.5 3v-1z" stroke="currentColor" strokeWidth="1.1" strokeLinejoin="round"/>
-    </svg>
-  ),
-  Message: () => (
-    <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-      <path d="M12 7.5A5 5 0 112 7.5c0 1 .3 2 .8 2.7L2 12l2.3-.7A5 5 0 0012 7.5z" stroke="currentColor" strokeWidth="1.1" strokeLinejoin="round"/>
-    </svg>
-  ),
-  Plus: () => (
-    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-      <path d="M8 3v10M3 8h10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-    </svg>
-  ),
-  Property: () => (
-    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-      <path d="M2 8L8 2l6 6v6a1 1 0 01-1 1H3a1 1 0 01-1-1V8z" stroke="currentColor" strokeWidth="1.25"/>
-      <path d="M5.5 15v-5.5h5V15" stroke="currentColor" strokeWidth="1.25"/>
-    </svg>
-  ),
-  ViewAll: () => (
-    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-      <rect x="1.5" y="1.5" width="5.5" height="5.5" rx="1" stroke="currentColor" strokeWidth="1.25"/>
-      <rect x="9" y="1.5" width="5.5" height="5.5" rx="1" stroke="currentColor" strokeWidth="1.25"/>
-      <rect x="1.5" y="9" width="5.5" height="5.5" rx="1" stroke="currentColor" strokeWidth="1.25"/>
-      <rect x="9" y="9" width="5.5" height="5.5" rx="1" stroke="currentColor" strokeWidth="1.25"/>
-    </svg>
-  ),
-  Booking: () => (
-    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-      <rect x="1.5" y="2.5" width="13" height="12" rx="1.5" stroke="currentColor" strokeWidth="1.25"/>
-      <path d="M6 2v2M10 2v2M1.5 7h13" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round"/>
-      <path d="M5 10.5l2 2 4-4" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round" strokeLinejoin="round"/>
-    </svg>
-  ),
+  Leads:    () => <Users          size={20} strokeWidth={1.6} />,
+  NewLeads: () => <UserPlus       size={20} strokeWidth={1.6} />,
+  Visit:    () => <Home           size={20} strokeWidth={1.6} />,
+  Bookings: () => <CalendarCheck2 size={20} strokeWidth={1.6} />,
+  FollowUp: () => <Clock          size={20} strokeWidth={1.6} />,
+  Phone:    () => <Phone          size={14} strokeWidth={1.6} />,
+  Message:  () => <MessageSquare  size={14} strokeWidth={1.6} />,
+  Plus:     () => <Plus           size={16} strokeWidth={1.8} />,
+  Property: () => <Building2      size={16} strokeWidth={1.6} />,
+  ViewAll:  () => <LayoutGrid     size={16} strokeWidth={1.6} />,
+  Booking:  () => <BookOpen       size={16} strokeWidth={1.6} />,
+  Chevron:  () => <ChevronRight   size={14} strokeWidth={1.8} />,
 };
 
 /* Pipeline Stage Bar */
@@ -364,9 +313,9 @@ function LeadRow({ lead }: { lead: typeof RECENT_LEADS[0] }) {
         </div>
       </td>
       <td className={styles.td}>
-        <span className={styles.source}>
-          <span>{SOURCE_ICON[lead.source] ?? "📌"}</span>
-          {lead.source}
+        <span className={styles.sourceTag}>
+          {SOURCE_ICON_COMPONENT[lead.source]}
+          <span>{lead.source}</span>
         </span>
       </td>
       <td className={styles.td}>
@@ -390,7 +339,9 @@ function LeadRow({ lead }: { lead: typeof RECENT_LEADS[0] }) {
         <span className={styles.dateText}>{lead.created}</span>
       </td>
       <td className={styles.tdRight}>
-        <Button variant="ghost" size="sm">View</Button>
+        <Button variant="ghost" size="sm" iconRight={<Eye size={13} />}>
+          View
+        </Button>
       </td>
     </tr>
   );
@@ -413,7 +364,10 @@ function LeadCard({ lead }: { lead: typeof RECENT_LEADS[0] }) {
         </Badge>
       </div>
       <div className={styles.mobileCardMeta}>
-        <span>{SOURCE_ICON[lead.source]} {lead.source}</span>
+        <span className={styles.sourceTag}>
+          {SOURCE_ICON_COMPONENT[lead.source]}
+          <span>{lead.source}</span>
+        </span>
         <span>·</span>
         <span>{lead.project}</span>
       </div>
@@ -458,7 +412,9 @@ function BookingRow({ b }: { b: typeof RECENT_BOOKINGS[0] }) {
         </Badge>
       </td>
       <td className={styles.tdRight}>
-        <Button variant="ghost" size="sm">View</Button>
+        <Button variant="ghost" size="sm" iconRight={<Eye size={13} />}>
+          View
+        </Button>
       </td>
     </tr>
   );
@@ -527,6 +483,7 @@ export default function DashboardPage() {
           delta={{ value: 12.5, label: "vs last month" }}
           icon={<Icons.Leads />}
           iconColor="primary"
+          sparklineData={[180, 195, 210, 205, 230, 248]}
         />
         <StatCard
           title="New Leads"
@@ -534,6 +491,7 @@ export default function DashboardPage() {
           delta={{ value: 18.2, label: "vs last month" }}
           icon={<Icons.NewLeads />}
           iconColor="info"
+          sparklineData={[50, 62, 58, 70, 78, 84]}
         />
         <StatCard
           title="Site Visits"
@@ -541,6 +499,7 @@ export default function DashboardPage() {
           delta={{ value: 8.7, label: "vs last month" }}
           icon={<Icons.Visit />}
           iconColor="secondary"
+          sparklineData={[28, 32, 30, 36, 39, 42]}
         />
         <StatCard
           title="Bookings"
@@ -548,6 +507,7 @@ export default function DashboardPage() {
           delta={{ value: 22.2, label: "vs last month" }}
           icon={<Icons.Bookings />}
           iconColor="success"
+          sparklineData={[5, 7, 6, 8, 9, 11]}
         />
         <StatCard
           title="Follow-ups Due"
@@ -555,6 +515,7 @@ export default function DashboardPage() {
           delta={{ value: -4.2, positive: false, label: "improvement" }}
           icon={<Icons.FollowUp />}
           iconColor="warning"
+          sparklineData={[35, 30, 28, 26, 25, 23]}
         />
       </div>
 
@@ -681,6 +642,7 @@ export default function DashboardPage() {
                 >
                   <span className={styles.qaIcon}>{qa.icon}</span>
                   <span className={styles.qaLabel}>{qa.label}</span>
+                  <span className={styles.qaChevron}><Icons.Chevron /></span>
                 </button>
               ))}
             </div>

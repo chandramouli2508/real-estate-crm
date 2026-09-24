@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { cn } from "@/lib/cn";
 import styles from "./AppShell.module.css";
 import { Sidebar } from "@/components/layout/Sidebar";
@@ -12,8 +13,22 @@ interface AppShellProps {
 }
 
 function AppShell({ children }: AppShellProps) {
+  const router = useRouter();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        setIsAuthenticated(false);
+        router.push("/login");
+      } else {
+        setIsAuthenticated(true);
+      }
+    }
+  }, [router]);
 
   function toggleSidebar() {
     // On tablet+, collapse/expand; on mobile open/close
@@ -22,6 +37,11 @@ function AppShell({ children }: AppShellProps) {
     } else {
       setSidebarCollapsed((v) => !v);
     }
+  }
+
+  // Prevent flash of protected content while checking auth
+  if (isAuthenticated === false) {
+    return null;
   }
 
   return (

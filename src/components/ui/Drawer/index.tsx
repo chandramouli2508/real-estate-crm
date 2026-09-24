@@ -4,6 +4,7 @@ import React, { useEffect, useCallback } from "react";
 import { createPortal } from "react-dom";
 import { cn } from "@/lib/cn";
 import styles from "./Drawer.module.css";
+import { X } from "lucide-react";
 
 export interface DrawerProps {
   isOpen: boolean;
@@ -49,9 +50,7 @@ function Drawer({
         <div className={styles.header}>
           {title && <h2 className={styles.title}>{title}</h2>}
           <button className={styles.closeBtn} onClick={onClose} aria-label="Close drawer">
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-              <path d="M4 4l12 12M16 4L4 16" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-            </svg>
+            <X size={20} strokeWidth={1.8} />
           </button>
         </div>
         <div className={styles.body}>{children}</div>
