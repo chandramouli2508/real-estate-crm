@@ -23,7 +23,7 @@ function AppShell({ children }: AppShellProps) {
       const token = localStorage.getItem("token");
       if (!token) {
         setIsAuthenticated(false);
-        router.push("/login");
+        router.replace("/login");
       } else {
         setIsAuthenticated(true);
       }
@@ -40,8 +40,10 @@ function AppShell({ children }: AppShellProps) {
   }
 
   // Prevent flash of protected content while checking auth
-  if (isAuthenticated === false) {
-    return null;
+  if (isAuthenticated !== true) {
+    return (
+      <div style={{ minHeight: "100vh", width: "100vw", backgroundColor: "var(--color-bg, #0F172A)" }} />
+    );
   }
 
   return (
