@@ -71,6 +71,11 @@ model Property {
   availableUnits Int      @default(0)
   possessionDate String?
   bannerGradient String?
+  imageUrl       String?
+  imagePublicId  String?
+  developer      String?
+  reraId         String?
+  amenities      String?
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 

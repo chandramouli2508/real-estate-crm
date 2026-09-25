@@ -1,19 +1,18 @@
 .sidebar {
-  position: fixed;
-  top: 0;
-  left: 0;
-  bottom: 0;
-  width: var(--sidebar-width);
+  height: 100%;
+  width: 100%;
   background-color: var(--color-sidebar-bg);
   display: flex;
   flex-direction: column;
-  z-index: var(--z-sticky);
+  z-index: 10;
   transition: width var(--transition-slow);
   border-right: 1px solid var(--color-sidebar-border);
+  position: relative;
+  overflow: hidden;
 }
 
 .collapsed {
-  width: var(--sidebar-collapsed-width);
+  width: var(--sidebar-collapsed-width) !important;
 }
 
 /* Logo */
@@ -25,6 +24,11 @@
   height: var(--header-height);
   border-bottom: 1px solid var(--color-sidebar-border);
   flex-shrink: 0;
+}
+
+.collapsed .logo {
+  padding: var(--space-4) 0;
+  justify-content: center;
 }
 
 .logoMark {
@@ -58,12 +62,17 @@
   gap: var(--space-1);
 }
 
+.collapsed .navSection {
+  padding: 0 var(--space-2);
+  align-items: center;
+}
+
 .navLabel {
   font-size: 10px;
   font-weight: var(--font-semibold);
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  color: #475569;
+  color: rgba(255, 255, 255, 0.5);
   padding: var(--space-2) var(--space-2) var(--space-1);
   white-space: nowrap;
 }
@@ -72,7 +81,7 @@
   display: flex;
   align-items: center;
   gap: var(--space-3);
-  padding: var(--space-2) var(--space-2);
+  padding: var(--space-2) var(--space-3);
   border-radius: var(--radius-md);
   color: var(--color-sidebar-text);
   font-size: var(--text-sm);
@@ -84,6 +93,13 @@
   min-height: 40px;
 }
 
+.collapsed .navItem {
+  justify-content: center;
+  padding: var(--space-2);
+  width: 44px;
+  margin: 0 auto;
+}
+
 .navItem:hover {
   background-color: var(--color-sidebar-hover-bg);
   color: var(--color-sidebar-active);
@@ -92,11 +108,13 @@
 
 .active {
   background-color: var(--color-sidebar-active-bg);
-  color: var(--color-sidebar-active) !important;
+  color: #ffffff !important;
+  font-weight: var(--font-semibold);
+  box-shadow: 0 4px 12px rgba(37, 132, 246, 0.35);
 }
 
 .active .navIcon {
-  color: var(--color-primary);
+  color: #ffffff;
 }
 
 .navIcon {
@@ -120,8 +138,8 @@
   min-width: 20px;
   height: 20px;
   padding: 0 6px;
-  background: var(--color-primary);
-  color: #fff;
+  background: rgba(255, 255, 255, 0.2);
+  color: #FFFFFF;
   border-radius: var(--radius-full);
   font-size: 11px;
   font-weight: var(--font-bold);
@@ -134,7 +152,7 @@
   right: 6px;
   width: 7px;
   height: 7px;
-  background: var(--color-primary);
+  background: var(--color-sidebar-active-bg);
   border-radius: var(--radius-full);
   border: 1.5px solid var(--color-sidebar-bg);
 }
@@ -146,6 +164,11 @@
   gap: var(--space-1);
   border-top: 1px solid var(--color-sidebar-border);
   margin-top: var(--space-3);
+}
+
+.collapsed .navBottom {
+  padding: var(--space-3) var(--space-2);
+  align-items: center;
 }
 
 /* User area */
@@ -206,7 +229,7 @@
   color: var(--color-sidebar-text);
 }
 
-/* Collapse toggle */
+/* Collapse toggle button */
 .toggleBtn {
   position: absolute;
   top: calc(var(--header-height) / 2 - 12px);
@@ -221,8 +244,8 @@
   justify-content: center;
   cursor: pointer;
   color: var(--color-text-muted);
-  box-shadow: var(--shadow-sm);
-  z-index: 10;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+  z-index: 20;
   transition: background-color var(--transition-fast), color var(--transition-fast);
 }
 
@@ -231,21 +254,37 @@
   color: var(--color-text-primary);
 }
 
-/* Responsive */
-@media (max-width: 1024px) {
-  .sidebar {
-    width: var(--sidebar-collapsed-width);
+@media (max-width: 768px) {
+  .toggleBtn {
+    display: none;
   }
 }
 
-@media (max-width: 768px) {
-  .sidebar {
-    transform: translateX(-100%);
-    transition: transform var(--transition-slow), width var(--transition-slow);
-    width: var(--sidebar-width);
-  }
+.disabledNav {
+  opacity: 0.45;
+  cursor: not-allowed !important;
+  pointer-events: auto !important;
+  user-select: none;
+}
 
-  .sidebar.mobileOpen {
-    transform: translateX(0);
-  }
+.disabledNav:hover {
+  background-color: transparent !important;
+  color: var(--color-sidebar-text) !important;
+  cursor: not-allowed !important;
+}
+
+.disabledNav * {
+  cursor: not-allowed !important;
+}
+
+.soonBadge {
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  background: rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.7);
+  padding: 2px 6px;
+  border-radius: 4px;
+  margin-left: auto;
+  letter-spacing: 0.05em;
 }

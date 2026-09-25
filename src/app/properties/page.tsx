@@ -1,18 +1,13 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect, useRef } from "react";
 import { AppShell } from "@/components/layout/AppShell";
-import { PageHeader } from "@/components/ui/PageHeader";
 import { FilterToolbar } from "@/components/ui/FilterToolbar";
-import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
-import { SearchInput } from "@/components/ui/SearchInput";
 import { Select } from "@/components/ui/Select";
-import { Dropdown } from "@/components/ui/Dropdown";
 import { Modal } from "@/components/ui/Modal";
 import { EmptyState } from "@/components/ui/EmptyState";
-import { ErrorState } from "@/components/ui/ErrorState";
 import { Input } from "@/components/ui/Input";
 import { Textarea } from "@/components/ui/Textarea";
 import { useToast } from "@/components/ui/Toast";
@@ -20,11 +15,12 @@ import styles from "./properties.module.css";
 import {
   Building2, Plus, MapPin, RefreshCw,
   Home, Eye, Edit3, Trash2, Layers, CheckCircle2,
-  Building, Maximize2
+  Building, Maximize2, Heart, ChevronRight, BedDouble,
+  Upload, Image as ImageIcon, Sparkles, X, ShieldCheck
 } from "lucide-react";
 
 /* ─────────────────────────────────────────────────────────────
-   TYPES & MOCK DATA
+   TYPES & DEFAULT IMAGES
    ───────────────────────────────────────────────────────────── */
 
 export type PropertyType = "Apartments" | "Villas" | "Plots" | "Commercial";
@@ -44,8 +40,22 @@ export interface Property {
   status: PropertyStatus;
   possessionDate: string;
   description: string;
-  bannerGradient: string;
+  imageUrl?: string;
+  imagePublicId?: string;
+  developer?: string;
+  reraId?: string;
+  amenities?: string;
+  bannerGradient?: string;
 }
+
+const DEFAULT_PROPERTY_IMAGES = [
+  "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80",
+  "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=800&q=80",
+  "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=800&q=80",
+  "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=800&q=80",
+  "https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=800&q=80",
+  "https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=800&q=80",
+];
 
 const INITIAL_PROPERTIES: Property[] = [
   {
@@ -61,8 +71,11 @@ const INITIAL_PROPERTIES: Property[] = [
     availableUnits: 42,
     status: "Under Construction",
     possessionDate: "Dec 2026",
+    developer: "Green Earth Developers",
+    reraId: "PRM/KA/RERA/1251/446/PR/210315",
+    amenities: "Infinity Pool, Clubhouse, Gym, Badminton Court, 24/7 Power Backup",
     description: "Premium eco-friendly residential towers featuring rooftop infinity pool, clubhouse, and lush green garden landscapes.",
-    bannerGradient: "linear-gradient(135deg, #1E1B4B 0%, #312E81 50%, #4338CA 100%)",
+    imageUrl: DEFAULT_PROPERTY_IMAGES[0],
   },
   {
     id: "prop-2",
@@ -77,12 +90,15 @@ const INITIAL_PROPERTIES: Property[] = [
     availableUnits: 12,
     status: "Under Construction",
     possessionDate: "Aug 2027",
+    developer: "Prestige Group",
+    reraId: "PRM/KA/RERA/1251/310/PR/220510",
+    amenities: "Private Decks, Smart Home Automation, Sky Lounge, Heated Pool, Concierge",
     description: "Ultra-luxury sky villas with private decks, smart home automation, and panoramic city views in the heart of Indiranagar.",
-    bannerGradient: "linear-gradient(135deg, #0F172A 0%, #1E293B 50%, #0284C7 100%)",
+    imageUrl: DEFAULT_PROPERTY_IMAGES[1],
   },
   {
     id: "prop-3",
-    name: "Lakeview Villas",
+    name: "Emerald Villas",
     location: "Sarjapur Road, Bangalore",
     type: "Villas",
     specs: "4 & 5 BHK Duplex",
@@ -93,72 +109,81 @@ const INITIAL_PROPERTIES: Property[] = [
     availableUnits: 18,
     status: "Ready to Move",
     possessionDate: "Immediate",
+    developer: "Sobha Developers",
+    reraId: "PRM/KA/RERA/1251/472/PR/191104",
+    amenities: "Private Pool, Double Height Living, Organic Garden, Tennis Court, Solar Backup",
     description: "Exclusive waterfront villas with private garden lawns, double-height ceilings, and private pool options.",
-    bannerGradient: "linear-gradient(135deg, #064E3B 0%, #047857 50%, #10B981 100%)",
-  },
-  {
-    id: "prop-4",
-    name: "Silicon Tech Park",
-    location: "Electronic City, Bangalore",
-    type: "Commercial",
-    specs: "Grade-A Office Spaces",
-    areaRange: "1,500 - 10,000 sq.ft",
-    startingPrice: "₹85 L",
-    priceValueLakhs: 85,
-    totalUnits: 60,
-    availableUnits: 28,
-    status: "Ready to Move",
-    possessionDate: "Immediate",
-    description: "Modern commercial complex designed for tech enterprises, featuring high-speed elevators, 100% power backup, and food court.",
-    bannerGradient: "linear-gradient(135deg, #4C1D95 0%, #6D28D9 50%, #8B5CF6 100%)",
-  },
-  {
-    id: "prop-5",
-    name: "Urban Horizon Suites",
-    location: "HSR Layout, Bangalore",
-    type: "Apartments",
-    specs: "1 & 2 BHK Compact Luxury",
-    areaRange: "650 - 1,150 sq.ft",
-    startingPrice: "₹65 L",
-    priceValueLakhs: 65,
-    totalUnits: 150,
-    availableUnits: 5,
-    status: "Ready to Move",
-    possessionDate: "Immediate",
-    description: "Smart compact apartments tailor-made for young tech professionals and high-yield rental investment.",
-    bannerGradient: "linear-gradient(135deg, #78350F 0%, #B45309 50%, #F59E0B 100%)",
-  },
-  {
-    id: "prop-6",
-    name: "Royal Palm Estates",
-    location: "Yelahanka, Bangalore",
-    type: "Plots",
-    specs: "30x40 & 40x60 Villa Sites",
-    areaRange: "1,200 - 2,400 sq.ft",
-    startingPrice: "₹48 L",
-    priceValueLakhs: 48,
-    totalUnits: 200,
-    availableUnits: 110,
-    status: "New Launch",
-    possessionDate: "Mar 2026",
-    description: "BIAPPA approved gated plot township with underground utilities, wide asphalt roads, and grand entrance arch.",
-    bannerGradient: "linear-gradient(135deg, #134E4A 0%, #0D9488 50%, #14B8A6 100%)",
+    imageUrl: DEFAULT_PROPERTY_IMAGES[2],
   },
 ];
 
-const STATUS_BADGE_VARIANT: Record<PropertyStatus, "success" | "info" | "primary" | "danger"> = {
-  "Ready to Move": "success",
-  "Under Construction": "info",
-  "New Launch": "primary",
-  "Sold Out": "danger",
+const STATUS_CLASS_MAP: Record<PropertyStatus, string> = {
+  "Ready to Move": styles.statusReady,
+  "Under Construction": styles.statusUnderConst,
+  "New Launch": styles.statusNewLaunch,
+  "Sold Out": styles.statusSoldOut,
 };
 
 const TYPE_ICONS: Record<PropertyType, React.ReactNode> = {
-  Apartments: <Building2 size={15} strokeWidth={1.8} />,
-  Villas: <Home size={15} strokeWidth={1.8} />,
-  Plots: <Layers size={15} strokeWidth={1.8} />,
-  Commercial: <Building size={15} strokeWidth={1.8} />,
+  Apartments: <Building2 size={14} strokeWidth={1.8} />,
+  Villas: <Home size={14} strokeWidth={1.8} />,
+  Plots: <Layers size={14} strokeWidth={1.8} />,
+  Commercial: <Building size={14} strokeWidth={1.8} />,
 };
+
+function normalizeStatus(rawStatus?: string): PropertyStatus {
+  if (!rawStatus) return "Under Construction";
+  const s = String(rawStatus).toUpperCase().replace(/\s+/g, "_");
+  if (s === "READY_TO_MOVE" || s === "READY TO MOVE") return "Ready to Move";
+  if (s === "UNDER_CONSTRUCTION" || s === "UNDER CONSTRUCTION") return "Under Construction";
+  if (s === "NEW_LAUNCH" || s === "NEW LAUNCH") return "New Launch";
+  if (s === "SOLD_OUT" || s === "SOLD OUT") return "Sold Out";
+  return "Under Construction";
+}
+
+function normalizeType(rawType?: string): PropertyType {
+  if (!rawType) return "Apartments";
+  const t = String(rawType).toUpperCase();
+  if (t === "APARTMENTS" || t === "APARTMENT") return "Apartments";
+  if (t === "VILLAS" || t === "VILLA") return "Villas";
+  if (t === "PLOTS" || t === "PLOT") return "Plots";
+  if (t === "COMMERCIAL") return "Commercial";
+  return "Apartments";
+}
+
+function toDbPropertyType(rawType?: string): string {
+  if (!rawType) return "APARTMENTS";
+  const t = String(rawType).toUpperCase();
+  if (t === "APARTMENTS" || t === "APARTMENT") return "APARTMENTS";
+  if (t === "VILLAS" || t === "VILLA") return "VILLAS";
+  if (t === "PLOTS" || t === "PLOT") return "PLOTS";
+  if (t === "COMMERCIAL") return "COMMERCIAL";
+  return "APARTMENTS";
+}
+
+function toDbPropertyStatus(rawStatus?: string): string {
+  if (!rawStatus) return "UNDER_CONSTRUCTION";
+  const s = String(rawStatus).toUpperCase().replace(/\s+/g, "_");
+  if (s === "READY_TO_MOVE" || s === "READY TO MOVE") return "READY_TO_MOVE";
+  if (s === "UNDER_CONSTRUCTION" || s === "UNDER CONSTRUCTION") return "UNDER_CONSTRUCTION";
+  if (s === "NEW_LAUNCH" || s === "NEW LAUNCH") return "NEW_LAUNCH";
+  if (s === "SOLD_OUT" || s === "SOLD OUT") return "SOLD_OUT";
+  return "UNDER_CONSTRUCTION";
+}
+
+function formatSpecsText(rawSpecs?: string): string {
+  if (!rawSpecs) return "2 & 3 BHK";
+  let s = String(rawSpecs).trim();
+  s = s.replace(/\s*BHK\s*BHK+/gi, " BHK").replace(/BHK\s+BHK/gi, "BHK").trim();
+  return s;
+}
+
+function formatAreaText(rawArea?: string | number): string {
+  if (!rawArea) return "1,200 - 2,400 sq.ft";
+  let a = String(rawArea).trim();
+  a = a.replace(/\s*sq\.?ft\s*sq\.?ft+/gi, " sq.ft").replace(/sq\.?ft\s+sq\.?ft/gi, "sq.ft").trim();
+  return a;
+}
 
 /* ─────────────────────────────────────────────────────────────
    MAIN COMPONENT
@@ -166,11 +191,12 @@ const TYPE_ICONS: Record<PropertyType, React.ReactNode> = {
 
 export default function PropertiesPage() {
   const toast = useToast();
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   // Primary Data State
   const [properties, setProperties] = useState<Property[]>(INITIAL_PROPERTIES);
   const [loading, setLoading] = useState<boolean>(false);
-  const [hasError, setHasError] = useState<boolean>(false);
+  const [submitting, setSubmitting] = useState<boolean>(false);
 
   // Filter States
   const [search, setSearch] = useState("");
@@ -179,13 +205,18 @@ export default function PropertiesPage() {
   const [selectedAvailability, setSelectedAvailability] = useState("All Availability");
   const [selectedPriceRange, setSelectedPriceRange] = useState("All Prices");
 
-  // Modal / Drawer States
+  // Modals & Drawers State
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [editingProperty, setEditingProperty] = useState<Property | null>(null);
   const [viewingProperty, setViewingProperty] = useState<Property | null>(null);
   const [deletingProperty, setDeletingProperty] = useState<Property | null>(null);
 
-  // Form Data State
+  // Image Upload State
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [fileError, setFileError] = useState<string | null>(null);
+
+  // Form State for Add / Edit Property
   const [formData, setFormData] = useState<Partial<Property>>({
     name: "",
     location: "Whitefield, Bangalore",
@@ -195,60 +226,157 @@ export default function PropertiesPage() {
     startingPrice: "₹1.10 Cr",
     priceValueLakhs: 110,
     totalUnits: 100,
-    availableUnits: 50,
+    availableUnits: 45,
     status: "Under Construction",
     possessionDate: "Dec 2026",
+    developer: "",
+    reraId: "",
+    amenities: "",
     description: "",
   });
 
-  // Filter Options
-  const locationOptions = [
-    "All Locations",
-    "Whitefield, Bangalore",
-    "Indiranagar, Bangalore",
-    "Sarjapur Road, Bangalore",
-    "Electronic City, Bangalore",
-    "HSR Layout, Bangalore",
-    "Yelahanka, Bangalore",
-  ];
+  // Frontend File Validation Handler
+  function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
 
-  const typeOptions = ["All Types", "Apartments", "Villas", "Plots", "Commercial"];
-  const availabilityOptions = ["All Availability", "Ready to Move", "Under Construction", "New Launch", "Almost Sold Out"];
-  const priceOptions = ["All Prices", "Under ₹1 Cr", "₹1 - 2 Cr", "₹2 - 3 Cr", "Above ₹3 Cr"];
+    setFileError(null);
+
+    // 1. Validate File Size (Max 2 MB)
+    const MAX_SIZE = 2 * 1024 * 1024;
+    if (file.size > MAX_SIZE) {
+      setFileError(`File size exceeds 2 MB limit (${(file.size / (1024 * 1024)).toFixed(2)} MB selected).`);
+      setSelectedFile(null);
+      setImagePreview(null);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      return;
+    }
+
+    // 2. Validate Allowed Extensions / MIME
+    const allowed = ["image/jpeg", "image/png", "image/jpg"];
+    if (!allowed.includes(file.type.toLowerCase())) {
+      setFileError("Only PNG and JPG/JPEG image formats are allowed.");
+      setSelectedFile(null);
+      setImagePreview(null);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      return;
+    }
+
+    setSelectedFile(file);
+    const reader = new FileReader();
+    reader.onload = () => setImagePreview(reader.result as string);
+    reader.readAsDataURL(file);
+  }
+
+  function clearSelectedFile() {
+    setSelectedFile(null);
+    setImagePreview(null);
+    setFileError(null);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  }
+
+  // Helper to parse backend property payload cleanly
+  const parseBackendProperty = (item: any, idx: number): Property => {
+    const normStatus = normalizeStatus(item.status);
+    const normType = normalizeType(item.type);
+    const rawSpecs = item.bedrooms
+      ? (String(item.bedrooms).includes("BHK") ? item.bedrooms : `${item.bedrooms} BHK`)
+      : item.specs || "2 & 3 BHK";
+    const rawArea = item.area
+      ? (String(item.area).includes("sq.ft") ? item.area : `${item.area} sq.ft`)
+      : item.areaRange || "1,200 - 2,400 sq.ft";
+
+    const priceDisplay = item.priceLabel
+      ? (String(item.priceLabel).startsWith("₹") ? item.priceLabel : `₹${item.priceLabel}`)
+      : item.price
+      ? (typeof item.price === "number" && item.price > 10000 ? `₹${(item.price / 10000000).toFixed(2)} Cr` : `₹${item.price}`)
+      : "₹1.20 Cr";
+
+    return {
+      id: item.id,
+      name: item.name || item.title || "Real Estate Project",
+      location: item.location || "Bangalore",
+      type: normType,
+      specs: formatSpecsText(rawSpecs),
+      areaRange: formatAreaText(rawArea),
+      startingPrice: priceDisplay,
+      priceValueLakhs: typeof item.price === "number" ? Math.round(item.price > 10000 ? item.price / 100000 : item.price) : 120,
+      totalUnits: item.totalUnits || 100,
+      availableUnits: item.availableUnits || 40,
+      status: normStatus,
+      possessionDate: item.possessionDate || "Dec 2026",
+      developer: item.developer || "",
+      reraId: item.reraId || "",
+      amenities: item.amenities || "",
+      description: item.description || "",
+      imageUrl: item.imageUrl || item.images?.[0] || DEFAULT_PROPERTY_IMAGES[idx % DEFAULT_PROPERTY_IMAGES.length],
+      imagePublicId: item.imagePublicId || undefined,
+    };
+  };
+
+  // Fetch properties from Backend API on mount
+  useEffect(() => {
+    async function fetchProperties() {
+      setLoading(true);
+      try {
+        const res = await fetch("/api/properties");
+        if (res.ok) {
+          const json = await res.json();
+          if (json.success && Array.isArray(json.data) && json.data.length > 0) {
+            const formatted = json.data.map((item: any, idx: number) => parseBackendProperty(item, idx));
+            setProperties(formatted);
+          }
+        }
+      } catch (err) {
+        console.error("API fetch error:", err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchProperties();
+  }, []);
+
+  // Filter options lists derived from properties
+  const locationOptions = useMemo(() => {
+    const locs = Array.from(new Set(properties.map((p) => p.location)));
+    return ["All Locations", ...locs];
+  }, [properties]);
+
+  const typeOptions = useMemo(() => {
+    return ["All Types", "Apartments", "Villas", "Plots", "Commercial"];
+  }, []);
 
   // Filtered Properties Computation
   const filteredProperties = useMemo(() => {
     return properties.filter((item) => {
-      // Search term
-      if (search.trim()) {
-        const query = search.toLowerCase();
-        const matchesName = item.name.toLowerCase().includes(query);
-        const matchesLoc = item.location.toLowerCase().includes(query);
-        const matchesSpecs = item.specs.toLowerCase().includes(query);
-        if (!matchesName && !matchesLoc && !matchesSpecs) return false;
+      const query = search.toLowerCase().trim();
+      if (
+        query &&
+        !item.name.toLowerCase().includes(query) &&
+        !item.location.toLowerCase().includes(query) &&
+        !item.specs.toLowerCase().includes(query) &&
+        !(item.developer && item.developer.toLowerCase().includes(query))
+      ) {
+        return false;
       }
 
-      // Location
       if (selectedLocation !== "All Locations" && item.location !== selectedLocation) {
         return false;
       }
 
-      // Type
       if (selectedType !== "All Types" && item.type !== selectedType) {
         return false;
       }
 
-      // Availability status
       if (selectedAvailability !== "All Availability") {
         if (selectedAvailability === "Almost Sold Out") {
           const ratio = item.availableUnits / item.totalUnits;
           if (ratio > 0.20 || item.availableUnits === 0) return false;
-        } else if (item.status !== selectedAvailability) {
+        } else if (normalizeStatus(item.status) !== selectedAvailability) {
           return false;
         }
       }
 
-      // Price Range filter
       if (selectedPriceRange !== "All Prices") {
         const val = item.priceValueLakhs;
         if (selectedPriceRange === "Under ₹1 Cr" && val >= 100) return false;
@@ -261,7 +389,6 @@ export default function PropertiesPage() {
     });
   }, [properties, search, selectedLocation, selectedType, selectedAvailability, selectedPriceRange]);
 
-  // Reset Filters
   function handleClearFilters() {
     setSearch("");
     setSelectedLocation("All Locations");
@@ -277,88 +404,195 @@ export default function PropertiesPage() {
     selectedAvailability !== "All Availability" ||
     selectedPriceRange !== "All Prices";
 
-  // Simulate refresh / sync
-  function handleRefresh() {
+  async function handleRefresh() {
     setLoading(true);
-    setHasError(false);
-    setTimeout(() => {
+    try {
+      const res = await fetch("/api/properties");
+      if (res.ok) {
+        const json = await res.json();
+        if (json.success && Array.isArray(json.data) && json.data.length > 0) {
+          const formatted = json.data.map((item: any, idx: number) => parseBackendProperty(item, idx));
+          setProperties(formatted);
+          toast.info("Refreshed", "Property database synchronized with backend API.");
+          return;
+        }
+      }
+      toast.info("Refreshed", "Property list up to date.");
+    } catch (err) {
+      toast.error("Sync Error", "Could not reach database API.");
+    } finally {
       setLoading(false);
-      toast.info("Refreshed", "Property database synced.");
-    }, 600);
+    }
   }
 
-  // Add Property Submit
-  function handleAddSubmit(e: React.FormEvent) {
+  // Add Property Submit with Multipart Form Upload
+  async function handleAddSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!formData.name) {
       toast.error("Validation Error", "Property name is required.");
       return;
     }
+    if (fileError) {
+      toast.error("Image Validation Error", fileError);
+      return;
+    }
 
-    const newProp: Property = {
-      id: `prop-${Date.now()}`,
-      name: formData.name,
-      location: formData.location || "Whitefield, Bangalore",
-      type: (formData.type as PropertyType) || "Apartments",
-      specs: formData.specs || "2 & 3 BHK",
-      areaRange: formData.areaRange || "1,200 - 2,000 sq.ft",
-      startingPrice: formData.startingPrice || "₹1.10 Cr",
-      priceValueLakhs: Number(formData.priceValueLakhs) || 110,
-      totalUnits: Number(formData.totalUnits) || 100,
-      availableUnits: Number(formData.availableUnits) || 45,
-      status: (formData.status as PropertyStatus) || "Under Construction",
-      possessionDate: formData.possessionDate || "Dec 2026",
-      description: formData.description || "Newly added residential development.",
-      bannerGradient: "linear-gradient(135deg, #1E1B4B 0%, #312E81 50%, #4338CA 100%)",
-    };
+    setSubmitting(true);
+    try {
+      const fd = new FormData();
+      if (selectedFile) {
+        fd.append("file", selectedFile);
+      }
 
-    setProperties([newProp, ...properties]);
-    setIsAddModalOpen(false);
-    toast.success("Property Added", `"${newProp.name}" has been created successfully.`);
+      const payload = {
+        name: formData.name,
+        location: formData.location || "Whitefield, Bangalore",
+        type: toDbPropertyType(formData.type),
+        status: toDbPropertyStatus(formData.status),
+        price: Number(formData.priceValueLakhs ? formData.priceValueLakhs * 100000 : 11000000),
+        priceLabel: formData.startingPrice || "₹1.10 Cr",
+        bedrooms: formatSpecsText(formData.specs || "2 & 3 BHK"),
+        area: formatAreaText(formData.areaRange || "1,200 - 2,000 sq.ft"),
+        totalUnits: Number(formData.totalUnits) || 100,
+        availableUnits: Number(formData.availableUnits) || 45,
+        possessionDate: formData.possessionDate || "Dec 2026",
+        developer: formData.developer || "",
+        reraId: formData.reraId || "",
+        amenities: formData.amenities || "",
+        description: formData.description || "Newly registered residential development project.",
+      };
+
+      fd.append("data", JSON.stringify(payload));
+
+      const res = await fetch("/api/properties", {
+        method: "POST",
+        body: fd,
+      });
+
+      const json = await res.json();
+      if (!res.ok || !json.success) {
+        toast.error("Upload Failed", json.error || "Failed to create property.");
+        setSubmitting(false);
+        return;
+      }
+
+      const createdProp = parseBackendProperty(json.data, properties.length);
+      setProperties([createdProp, ...properties]);
+      setIsAddModalOpen(false);
+      clearSelectedFile();
+      toast.success("Property Added", `"${createdProp.name}" created successfully.`);
+    } catch (err: any) {
+      toast.error("Network Error", err.message || "Failed to submit property.");
+    } finally {
+      setSubmitting(false);
+    }
   }
 
-  // Edit Property Submit
-  function handleEditSubmit(e: React.FormEvent) {
+  // Edit Property Submit with Safe Image Replacement Sequence
+  async function handleEditSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!editingProperty || !editingProperty.name) return;
+    if (fileError) {
+      toast.error("Image Validation Error", fileError);
+      return;
+    }
 
-    setProperties((prev) =>
-      prev.map((p) => (p.id === editingProperty.id ? editingProperty : p))
-    );
-    setEditingProperty(null);
-    toast.success("Property Updated", `Changes to "${editingProperty.name}" saved.`);
+    setSubmitting(true);
+    try {
+      const fd = new FormData();
+      if (selectedFile) {
+        fd.append("file", selectedFile);
+      }
+
+      const payload = {
+        name: editingProperty.name,
+        location: editingProperty.location,
+        type: toDbPropertyType(editingProperty.type),
+        status: toDbPropertyStatus(editingProperty.status),
+        price: Number(editingProperty.priceValueLakhs ? editingProperty.priceValueLakhs * 100000 : 12000000),
+        priceLabel: editingProperty.startingPrice,
+        bedrooms: formatSpecsText(editingProperty.specs),
+        area: formatAreaText(editingProperty.areaRange),
+        totalUnits: Number(editingProperty.totalUnits),
+        availableUnits: Number(editingProperty.availableUnits),
+        possessionDate: editingProperty.possessionDate,
+        developer: editingProperty.developer || "",
+        reraId: editingProperty.reraId || "",
+        amenities: editingProperty.amenities || "",
+        description: editingProperty.description || "",
+        imageUrl: editingProperty.imagePublicId ? editingProperty.imageUrl : null,
+        imagePublicId: editingProperty.imagePublicId || null,
+      };
+
+      fd.append("data", JSON.stringify(payload));
+
+      const res = await fetch(`/api/properties/${editingProperty.id}`, {
+        method: "PUT",
+        body: fd,
+      });
+
+      const json = await res.json();
+      if (!res.ok || !json.success) {
+        toast.error("Update Failed", json.error || "Failed to update property.");
+        setSubmitting(false);
+        return;
+      }
+
+      const updatedProp = parseBackendProperty(json.data, 0);
+      setProperties((prev) =>
+        prev.map((p) => (p.id === updatedProp.id ? updatedProp : p))
+      );
+      setEditingProperty(null);
+      clearSelectedFile();
+      toast.success("Property Updated", `Changes to "${updatedProp.name}" saved.`);
+    } catch (err: any) {
+      toast.error("Network Error", err.message || "Failed to update property.");
+    } finally {
+      setSubmitting(false);
+    }
   }
 
-  // Delete Property
-  function handleDeleteConfirm() {
+  // Delete Property with API Integration & Cloud Storage Cleanup
+  async function handleDeleteConfirm() {
     if (!deletingProperty) return;
-    setProperties((prev) => prev.filter((p) => p.id !== deletingProperty.id));
-    toast.warning("Property Deleted", `"${deletingProperty.name}" was removed.`);
-    setDeletingProperty(null);
+    try {
+      const res = await fetch(`/api/properties/${deletingProperty.id}`, { method: "DELETE" });
+      if (!res.ok) {
+        toast.error("Delete Failed", "Could not remove property from server.");
+        return;
+      }
+      setProperties((prev) => prev.filter((p) => p.id !== deletingProperty.id));
+      toast.success("Property Deleted", `"${deletingProperty.name}" removed from catalog.`);
+    } catch (err) {
+      toast.error("Delete Error", "Network issue while deleting property.");
+    } finally {
+      setDeletingProperty(null);
+    }
   }
 
   return (
     <AppShell>
       <div className={styles.container}>
-        {/* ── REUSABLE PAGE HEADER ── */}
-        <PageHeader
-          title="Properties & Projects"
-          subtitle="Manage real estate developments, track unit availability, pricing, and project timelines."
-          actions={
-            <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
-              <Button
-                variant="secondary"
-                size="md"
-                iconLeft={<RefreshCw size={15} className={loading ? "animate-spin" : ""} />}
-                onClick={handleRefresh}
-              >
-                Sync
-              </Button>
-              <Button
-                variant="primary"
-                size="md"
-                iconLeft={<Plus size={16} />}
+        {/* ── OCEAN BLUE HERO BANNER ── */}
+        <section className={styles.heroBanner}>
+          <div className={styles.heroHeader}>
+            <div className={styles.heroTitleGroup}>
+              <h1 className={styles.heroTitle}>
+                Properties & Projects
+              </h1>
+              <p className={styles.heroSubtitle}>
+                Manage real estate developments, track unit availability, pricing, and project timelines
+              </p>
+            </div>
+
+            <div className={styles.heroRightControls}>
+              <button className={styles.heroBtn} onClick={handleRefresh}>
+                <RefreshCw size={14} className={loading ? "animate-spin" : ""} /> Sync Database
+              </button>
+              <button
+                className={styles.heroPrimaryBtn}
                 onClick={() => {
+                  clearSelectedFile();
                   setFormData({
                     name: "",
                     location: "Whitefield, Bangalore",
@@ -371,91 +605,121 @@ export default function PropertiesPage() {
                     availableUnits: 45,
                     status: "Under Construction",
                     possessionDate: "Dec 2026",
+                    developer: "",
+                    reraId: "",
+                    amenities: "",
                     description: "",
                   });
                   setIsAddModalOpen(true);
                 }}
               >
-                Add Property
-              </Button>
+                <Plus size={16} /> Add Property
+              </button>
             </div>
-          }
-        />
+          </div>
 
-        {/* ── REUSABLE RESPONSIVE FILTER TOOLBAR ── */}
+          {/* Integrated Hero KPI Grid */}
+          <div className={styles.heroKpiGrid}>
+            <div className={styles.heroKpiCard}>
+              <div className={styles.heroKpiHeader}>
+                <div className={styles.heroKpiIcon}><Building2 size={14} /></div>
+                Total Projects
+              </div>
+              <div className={styles.heroKpiValue}>{properties.length}</div>
+              <div className={styles.heroKpiTrend}>Active portfolios</div>
+            </div>
+
+            <div className={styles.heroKpiCard}>
+              <div className={styles.heroKpiHeader}>
+                <div className={styles.heroKpiIcon}><Home size={14} /></div>
+                Available Units
+              </div>
+              <div className={styles.heroKpiValue}>{properties.reduce((acc, p) => acc + p.availableUnits, 0)}</div>
+              <div className={styles.heroKpiTrend}>Open for booking</div>
+            </div>
+
+            <div className={styles.heroKpiCard}>
+              <div className={styles.heroKpiHeader}>
+                <div className={styles.heroKpiIcon}><CheckCircle2 size={14} /></div>
+                Ready to Move
+              </div>
+              <div className={styles.heroKpiValue}>
+                {properties.filter(p => normalizeStatus(p.status) === "Ready to Move").length}
+              </div>
+              <div className={styles.heroKpiTrend}>Immediate handover</div>
+            </div>
+
+            <div className={styles.heroKpiCard}>
+              <div className={styles.heroKpiHeader}>
+                <div className={styles.heroKpiIcon}><Layers size={14} /></div>
+                Under Construction
+              </div>
+              <div className={styles.heroKpiValue}>
+                {properties.filter(p => normalizeStatus(p.status) === "Under Construction").length}
+              </div>
+              <div className={styles.heroKpiTrend}>In active phase</div>
+            </div>
+          </div>
+        </section>
+
+        {/* ── RESPONSIVE FILTER TOOLBAR ── */}
         <FilterToolbar
           searchValue={search}
           onSearchChange={setSearch}
-          searchPlaceholder="Search by project name, location or specs..."
+          searchPlaceholder="Search by project name, developer, location..."
           hasActiveFilters={Boolean(isFilterActive)}
           onClearFilters={handleClearFilters}
         >
           <Select
             value={selectedLocation}
             onChange={(e) => setSelectedLocation(e.target.value)}
-            options={locationOptions.map((loc) => ({ label: loc, value: loc }))}
+            options={locationOptions.map((l) => ({ label: l, value: l }))}
           />
-
           <Select
             value={selectedType}
             onChange={(e) => setSelectedType(e.target.value)}
             options={typeOptions.map((t) => ({ label: t, value: t }))}
           />
-
           <Select
             value={selectedAvailability}
             onChange={(e) => setSelectedAvailability(e.target.value)}
-            options={availabilityOptions.map((a) => ({ label: a, value: a }))}
+            options={[
+              { label: "All Availability", value: "All Availability" },
+              { label: "Ready to Move", value: "Ready to Move" },
+              { label: "Under Construction", value: "Under Construction" },
+              { label: "New Launch", value: "New Launch" },
+              { label: "Almost Sold Out", value: "Almost Sold Out" },
+            ]}
           />
-
           <Select
             value={selectedPriceRange}
             onChange={(e) => setSelectedPriceRange(e.target.value)}
-            options={priceOptions.map((p) => ({ label: p, value: p }))}
+            options={[
+              { label: "All Prices", value: "All Prices" },
+              { label: "Under ₹1 Cr", value: "Under ₹1 Cr" },
+              { label: "₹1 - 2 Cr", value: "₹1 - 2 Cr" },
+              { label: "₹2 - 3 Cr", value: "₹2 - 3 Cr" },
+              { label: "Above ₹3 Cr", value: "Above ₹3 Cr" },
+            ]}
           />
         </FilterToolbar>
 
-        {/* ── CONTENT BODY (LOADING / ERROR / EMPTY / GRID) ── */}
-        {loading ? (
-          <div className={styles.grid}>
-            {Array.from({ length: 6 }).map((_, idx) => (
-              <div key={idx} className={styles.skeletonCard}>
-                <div className={styles.skeletonBanner} />
-                <div className={styles.skeletonBody}>
-                  <div className={styles.skeletonLine} style={{ width: "70%" }} />
-                  <div className={styles.skeletonLine} style={{ width: "40%" }} />
-                  <div className={styles.skeletonLine} style={{ width: "90%", marginTop: "auto" }} />
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : hasError ? (
-          <ErrorState
-            title="Failed to load properties"
-            message="Could not connect to property database. Please retry."
-            onRetry={handleRefresh}
-          />
-        ) : filteredProperties.length === 0 ? (
+        {/* ── PROPERTY CARDS GRID ── */}
+        {filteredProperties.length === 0 ? (
           <EmptyState
-            icon={<Building2 size={40} strokeWidth={1.4} />}
-            title="No properties found"
+            title="No Properties Found"
             description={
               isFilterActive
-                ? "No property records match your selected filter criteria."
-                : "Get started by adding your first real estate project or property."
+                ? "No listings match your search or filter parameters. Try clearing your filters."
+                : "Your property catalog is currently empty. Click 'Add Property' to add your first project."
             }
             action={
               isFilterActive ? (
-                <Button variant="secondary" size="md" onClick={handleClearFilters}>
-                  Clear Filters
+                <Button variant="secondary" size="sm" onClick={handleClearFilters}>
+                  Reset All Filters
                 </Button>
               ) : (
-                <Button
-                  variant="primary"
-                  size="md"
-                  iconLeft={<Plus size={16} />}
-                  onClick={() => setIsAddModalOpen(true)}
-                >
+                <Button variant="primary" size="sm" iconLeft={<Plus size={15} />} onClick={() => setIsAddModalOpen(true)}>
                   Add Property
                 </Button>
               )
@@ -463,151 +727,129 @@ export default function PropertiesPage() {
           />
         ) : (
           <div className={styles.grid}>
-            {filteredProperties.map((property) => {
-              const availRatio = property.totalUnits > 0 ? property.availableUnits / property.totalUnits : 0;
-              const availPercent = Math.round(availRatio * 100);
-
-              let progressClass = styles.progressSuccess;
-              if (availRatio <= 0.15) {
-                progressClass = styles.progressDanger;
-              } else if (availRatio <= 0.40) {
-                progressClass = styles.progressWarning;
-              }
+            {filteredProperties.map((property, idx) => {
+              const displayImg = property.imageUrl || DEFAULT_PROPERTY_IMAGES[idx % DEFAULT_PROPERTY_IMAGES.length];
+              const normalizedStatusVal = normalizeStatus(property.status);
+              const amenitiesList = property.amenities ? property.amenities.split(",").slice(0, 3) : [];
 
               return (
-                <Card key={property.id} hover padded={false}>
-                  {/* Banner Header Overlay */}
-                  <div
-                    className={styles.cardBanner}
-                    style={{ background: property.bannerGradient }}
-                  >
-                    <div className={styles.cardBannerOverlay} />
-                    <div className={styles.bannerTop}>
-                      <span className={styles.typeBadge}>
-                        {property.type}
+                <div key={property.id} className={styles.propertyCard}>
+                  {/* Top Image Banner */}
+                  <div className={styles.cardImageWrap}>
+                    <img
+                      src={displayImg}
+                      alt={property.name}
+                      className={styles.cardImg}
+                    />
+                    <div className={styles.imageBadgesTop}>
+                      <span className={`${styles.statusBadge} ${STATUS_CLASS_MAP[normalizedStatusVal] || styles.statusUnderConst}`}>
+                        {normalizedStatusVal}
                       </span>
-                      <Badge variant={STATUS_BADGE_VARIANT[property.status]} size="sm">
-                        {property.status}
-                      </Badge>
-                    </div>
-
-                    <div className={styles.bannerBottom}>
-                      <div className={styles.bannerIcon}>
-                        {TYPE_ICONS[property.type]}
-                      </div>
-                      <span style={{ fontSize: "12px", color: "rgba(255,255,255,0.9)", fontWeight: 500 }}>
-                        Possession: {property.possessionDate}
-                      </span>
+                      <button className={styles.favBtn} title="Bookmark Property">
+                        <Heart size={15} />
+                      </button>
                     </div>
                   </div>
 
-                  {/* Body Content */}
-                  <Card.Body style={{ padding: "16px 20px" }}>
-                    <div>
-                      <div className={styles.nameRow}>
-                        <h3 className={styles.propertyName}>{property.name}</h3>
-                      </div>
-                      <div className={styles.locationRow}>
-                        <MapPin size={13} strokeWidth={1.8} style={{ color: "var(--color-primary)" }} />
-                        <span>{property.location}</span>
-                      </div>
+                  {/* Card Body Content */}
+                  <div className={styles.cardBody}>
+                    {property.developer && (
+                      <span className={styles.developerTag}>
+                        {property.developer}
+                      </span>
+                    )}
+                    <h3 className={styles.cardTitle}>{property.name}</h3>
+                    <div className={styles.cardLocation}>
+                      <MapPin size={13} style={{ color: "#0066CC" }} />
+                      <span>{property.location}</span>
                     </div>
 
-                    <div className={styles.specsChips}>
-                      <span className={styles.specChip}>
-                        <Home size={11} strokeWidth={1.8} />
+                    <div className={styles.specsRow}>
+                      <span className={styles.specItem}>
+                        <BedDouble size={14} />
                         {property.specs}
                       </span>
-                      <span className={styles.specChip}>
-                        <Maximize2 size={11} strokeWidth={1.8} />
+                      <span className={styles.specItem}>
+                        <Maximize2 size={14} />
                         {property.areaRange}
+                      </span>
+                      <span className={styles.specItem}>
+                        {TYPE_ICONS[property.type]}
+                        {property.type}
                       </span>
                     </div>
 
-                    {/* Price & Availability Box */}
-                    <div className={styles.infoBox}>
-                      <div className={styles.priceRow}>
-                        <span className={styles.priceLabel}>Starting Price</span>
-                        <span className={styles.priceValue}>{property.startingPrice}</span>
-                      </div>
-
-                      <div className={styles.availabilitySection}>
-                        <div className={styles.availabilityHeader}>
-                          <span>Availability</span>
-                          <span className={styles.availabilityText}>
-                            <strong>{property.availableUnits}</strong> / {property.totalUnits} Units ({availPercent}%)
+                    {/* Amenities pills */}
+                    {amenitiesList.length > 0 && (
+                      <div className={styles.amenitiesWrap}>
+                        {amenitiesList.map((am, aIdx) => (
+                          <span key={aIdx} className={styles.amenityPill}>
+                            {am.trim()}
                           </span>
-                        </div>
-                        <div className={styles.progressTrack}>
-                          <div
-                            className={`${styles.progressFill} ${progressClass}`}
-                            style={{ width: `${Math.min(100, Math.max(4, availPercent))}%` }}
-                          />
-                        </div>
+                        ))}
                       </div>
+                    )}
+                  </div>
+
+                  {/* Card Footer */}
+                  <div className={styles.cardFooter}>
+                    <div className={styles.priceCol}>
+                      <span className={styles.priceLabel}>Starting Price</span>
+                      <span className={styles.priceVal}>{property.startingPrice}</span>
                     </div>
-                  </Card.Body>
 
-                  {/* Footer Actions */}
-                  <Card.Footer style={{ padding: "12px 20px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                    <span className={styles.unitsText}>
-                      {property.availableUnits === 0 ? (
-                        <span style={{ color: "var(--color-danger)", fontWeight: 600 }}>Sold Out</span>
-                      ) : (
-                        <span>{property.availableUnits} units available</span>
-                      )}
-                    </span>
-
-                    <div className={styles.footerActions}>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        title="View Details"
+                    <div className={styles.cardActions}>
+                      <button
+                        className={styles.readMoreBtn}
                         onClick={() => setViewingProperty(property)}
-                        style={{ padding: "6px" }}
                       >
-                        <Eye size={15} />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
+                        Read more <ChevronRight size={14} />
+                      </button>
+                      <button
+                        className={styles.actionIconBtn}
                         title="Edit Property"
-                        onClick={() => setEditingProperty({ ...property })}
-                        style={{ padding: "6px" }}
+                        onClick={() => {
+                          clearSelectedFile();
+                          setEditingProperty({ ...property });
+                        }}
                       >
-                        <Edit3 size={15} />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
+                        <Edit3 size={14} />
+                      </button>
+                      <button
+                        className={styles.actionIconBtn}
                         title="Delete Property"
+                        style={{ color: "#EF4444" }}
                         onClick={() => setDeletingProperty(property)}
-                        style={{ padding: "6px", color: "var(--color-danger)" }}
                       >
-                        <Trash2 size={15} />
-                      </Button>
+                        <Trash2 size={14} />
+                      </button>
                     </div>
-                  </Card.Footer>
-                </Card>
+                  </div>
+                </div>
               );
             })}
           </div>
         )}
       </div>
 
-      {/* ── ADD PROPERTY MODAL ── */}
+      {/* ── ADD PROPERTY MODAL WITH FILE UPLOAD & NEW FIELDS ── */}
       <Modal
         isOpen={isAddModalOpen}
         onClose={() => setIsAddModalOpen(false)}
         title="Add New Property"
-        description="Register a new real estate project or development into the CRM."
+        description="Register a new real estate development into the CRM catalog."
         size="lg"
       >
         <form onSubmit={handleAddSubmit}>
           <div className={styles.formGrid}>
+            {/* Section 1: Basic Information */}
+            <div className={styles.formSectionTitle}>
+              <Building2 size={14} /> Basic Project Information
+            </div>
+
             <div className={styles.formFullWidth}>
               <Input
-                label="Property / Project Name *"
+                label="Property Name"
                 placeholder="e.g. Greenview Residences"
                 value={formData.name || ""}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
@@ -615,22 +857,74 @@ export default function PropertiesPage() {
               />
             </div>
 
+            <Input
+              label="Developer / Builder Name"
+              placeholder="e.g. Prestige Group or Sobha"
+              value={formData.developer || ""}
+              onChange={(e) => setFormData({ ...formData, developer: e.target.value })}
+            />
+
+            <Input
+              label="RERA Registration / Ref ID"
+              placeholder="e.g. PRM/KA/RERA/1251/446/PR/210315"
+              value={formData.reraId || ""}
+              onChange={(e) => setFormData({ ...formData, reraId: e.target.value })}
+            />
+
             <Select
-              label="Location *"
+              label="Location"
               value={formData.location || locationOptions[1]}
               onChange={(e) => setFormData({ ...formData, location: e.target.value })}
               options={locationOptions.filter((l) => l !== "All Locations").map((l) => ({ label: l, value: l }))}
             />
 
             <Select
-              label="Property Type *"
+              label="Property Type"
               value={formData.type || "Apartments"}
               onChange={(e) => setFormData({ ...formData, type: e.target.value as PropertyType })}
               options={typeOptions.filter((t) => t !== "All Types").map((t) => ({ label: t, value: t }))}
             />
 
+            {/* Section 2: Property Image Upload */}
+            <div className={styles.formSectionTitle}>
+              <ImageIcon size={14} /> Showcase Image Upload (Max 2 MB - PNG / JPG)
+            </div>
+
+            <div className={styles.formFullWidth}>
+              {imagePreview ? (
+                <div className={styles.previewContainer}>
+                  <img src={imagePreview} alt="Property Showcase Preview" className={styles.previewImg} />
+                  <button type="button" className={styles.removeFileBtn} onClick={clearSelectedFile}>
+                    <X size={13} /> Replace Image
+                  </button>
+                </div>
+              ) : (
+                <label className={styles.uploadDropzone}>
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    accept="image/png, image/jpeg, image/jpg"
+                    onChange={handleFileChange}
+                    style={{ display: "none" }}
+                  />
+                  <div className={styles.uploadIcon}>
+                    <Upload size={20} />
+                  </div>
+                  <p className={styles.uploadTitle}>Click to upload property image</p>
+                  <p className={styles.uploadHint}>PNG, JPG or JPEG format up to 2 MB</p>
+                </label>
+              )}
+
+              {fileError && <div className={styles.fileError}>{fileError}</div>}
+            </div>
+
+            {/* Section 3: Specifications & Pricing */}
+            <div className={styles.formSectionTitle}>
+              <Maximize2 size={14} /> Specifications & Pricing
+            </div>
+
             <Input
-              label="Unit Specifications"
+              label="Specs"
               placeholder="e.g. 2, 3 & 4 BHK"
               value={formData.specs || ""}
               onChange={(e) => setFormData({ ...formData, specs: e.target.value })}
@@ -644,7 +938,7 @@ export default function PropertiesPage() {
             />
 
             <Input
-              label="Starting Price *"
+              label="Starting Price"
               placeholder="e.g. ₹1.25 Cr"
               value={formData.startingPrice || ""}
               onChange={(e) => setFormData({ ...formData, startingPrice: e.target.value })}
@@ -652,15 +946,20 @@ export default function PropertiesPage() {
             />
 
             <Input
-              label="Price in Lakhs (for sorting/filter)"
+              label="Price in Lakhs"
               type="number"
               placeholder="e.g. 125"
               value={formData.priceValueLakhs || ""}
               onChange={(e) => setFormData({ ...formData, priceValueLakhs: Number(e.target.value) })}
             />
 
+            {/* Section 4: Inventory & Amenities */}
+            <div className={styles.formSectionTitle}>
+              <Sparkles size={14} /> Inventory & Amenities
+            </div>
+
             <Input
-              label="Total Units *"
+              label="Total Units"
               type="number"
               placeholder="e.g. 120"
               value={formData.totalUnits || ""}
@@ -669,7 +968,7 @@ export default function PropertiesPage() {
             />
 
             <Input
-              label="Available Units *"
+              label="Available Units"
               type="number"
               placeholder="e.g. 42"
               value={formData.availableUnits || ""}
@@ -678,7 +977,7 @@ export default function PropertiesPage() {
             />
 
             <Select
-              label="Construction / Sales Status *"
+              label="Status"
               value={formData.status || "Under Construction"}
               onChange={(e) => setFormData({ ...formData, status: e.target.value as PropertyStatus })}
               options={[
@@ -697,6 +996,20 @@ export default function PropertiesPage() {
             />
 
             <div className={styles.formFullWidth}>
+              <Input
+                label="Key Amenities (Comma separated)"
+                placeholder="e.g. Infinity Pool, Clubhouse, Gym, Badminton Court, 24/7 Power"
+                value={formData.amenities || ""}
+                onChange={(e) => setFormData({ ...formData, amenities: e.target.value })}
+              />
+            </div>
+
+            {/* Section 5: Highlights */}
+            <div className={styles.formSectionTitle}>
+              <Edit3 size={14} /> Highlights & Overview
+            </div>
+
+            <div className={styles.formFullWidth}>
               <Textarea
                 label="Description & Highlights"
                 placeholder="Enter key amenities, developer notes, and project highlights..."
@@ -711,8 +1024,8 @@ export default function PropertiesPage() {
             <Button variant="secondary" type="button" onClick={() => setIsAddModalOpen(false)}>
               Cancel
             </Button>
-            <Button variant="primary" type="submit" iconLeft={<Plus size={16} />}>
-              Create Property
+            <Button variant="primary" type="submit" disabled={submitting} iconLeft={<Plus size={16} />}>
+              {submitting ? "Uploading..." : "Create Property"}
             </Button>
           </div>
         </form>
@@ -724,33 +1037,99 @@ export default function PropertiesPage() {
           isOpen={Boolean(editingProperty)}
           onClose={() => setEditingProperty(null)}
           title={`Edit Property — ${editingProperty.name}`}
-          description="Update development details, unit counts, and availability status."
+          description="Update development details, upload a replacement image, or adjust availability status."
           size="lg"
         >
           <form onSubmit={handleEditSubmit}>
             <div className={styles.formGrid}>
+              <div className={styles.formSectionTitle}>
+                <Building2 size={14} /> Basic Project Information
+              </div>
+
               <div className={styles.formFullWidth}>
                 <Input
-                  label="Property Name *"
+                  label="Property Name"
                   value={editingProperty.name}
                   onChange={(e) => setEditingProperty({ ...editingProperty, name: e.target.value })}
                   required
                 />
               </div>
 
+              <Input
+                label="Developer / Builder Name"
+                placeholder="e.g. Prestige Group or Sobha"
+                value={editingProperty.developer || ""}
+                onChange={(e) => setEditingProperty({ ...editingProperty, developer: e.target.value })}
+              />
+
+              <Input
+                label="RERA Registration / Ref ID"
+                placeholder="e.g. PRM/KA/RERA/1251/446/PR/210315"
+                value={editingProperty.reraId || ""}
+                onChange={(e) => setEditingProperty({ ...editingProperty, reraId: e.target.value })}
+              />
+
               <Select
-                label="Location *"
+                label="Location"
                 value={editingProperty.location}
                 onChange={(e) => setEditingProperty({ ...editingProperty, location: e.target.value })}
                 options={locationOptions.filter((l) => l !== "All Locations").map((l) => ({ label: l, value: l }))}
               />
 
               <Select
-                label="Property Type *"
+                label="Property Type"
                 value={editingProperty.type}
                 onChange={(e) => setEditingProperty({ ...editingProperty, type: e.target.value as PropertyType })}
                 options={typeOptions.filter((t) => t !== "All Types").map((t) => ({ label: t, value: t }))}
               />
+
+              {/* Section 2: Property Image Upload / Replacement */}
+              <div className={styles.formSectionTitle}>
+                <ImageIcon size={14} /> Property Image (Replace or keep existing)
+              </div>
+
+              <div className={styles.formFullWidth}>
+                {imagePreview || editingProperty.imageUrl ? (
+                  <div className={styles.previewContainer}>
+                    <img
+                      src={imagePreview || editingProperty.imageUrl}
+                      alt="Property Showcase Preview"
+                      className={styles.previewImg}
+                    />
+                    <label className={styles.removeFileBtn}>
+                      <input
+                        type="file"
+                        ref={fileInputRef}
+                        accept="image/png, image/jpeg, image/jpg"
+                        onChange={handleFileChange}
+                        style={{ display: "none" }}
+                      />
+                      <Upload size={13} /> Replace Image
+                    </label>
+                  </div>
+                ) : (
+                  <label className={styles.uploadDropzone}>
+                    <input
+                      type="file"
+                      ref={fileInputRef}
+                      accept="image/png, image/jpeg, image/jpg"
+                      onChange={handleFileChange}
+                      style={{ display: "none" }}
+                    />
+                    <div className={styles.uploadIcon}>
+                      <Upload size={20} />
+                    </div>
+                    <p className={styles.uploadTitle}>Click to upload new property image</p>
+                    <p className={styles.uploadHint}>PNG, JPG or JPEG format up to 2 MB</p>
+                  </label>
+                )}
+
+                {fileError && <div className={styles.fileError}>{fileError}</div>}
+              </div>
+
+              <div className={styles.formSectionTitle}>
+                <Maximize2 size={14} /> Specifications & Pricing
+              </div>
 
               <Input
                 label="Specs"
@@ -765,7 +1144,7 @@ export default function PropertiesPage() {
               />
 
               <Input
-                label="Starting Price *"
+                label="Starting Price"
                 value={editingProperty.startingPrice}
                 onChange={(e) => setEditingProperty({ ...editingProperty, startingPrice: e.target.value })}
                 required
@@ -778,8 +1157,12 @@ export default function PropertiesPage() {
                 onChange={(e) => setEditingProperty({ ...editingProperty, priceValueLakhs: Number(e.target.value) })}
               />
 
+              <div className={styles.formSectionTitle}>
+                <Layers size={14} /> Inventory & Amenities
+              </div>
+
               <Input
-                label="Total Units *"
+                label="Total Units"
                 type="number"
                 value={editingProperty.totalUnits}
                 onChange={(e) => setEditingProperty({ ...editingProperty, totalUnits: Number(e.target.value) })}
@@ -787,7 +1170,7 @@ export default function PropertiesPage() {
               />
 
               <Input
-                label="Available Units *"
+                label="Available Units"
                 type="number"
                 value={editingProperty.availableUnits}
                 onChange={(e) => setEditingProperty({ ...editingProperty, availableUnits: Number(e.target.value) })}
@@ -795,7 +1178,7 @@ export default function PropertiesPage() {
               />
 
               <Select
-                label="Status *"
+                label="Status"
                 value={editingProperty.status}
                 onChange={(e) => setEditingProperty({ ...editingProperty, status: e.target.value as PropertyStatus })}
                 options={[
@@ -813,8 +1196,21 @@ export default function PropertiesPage() {
               />
 
               <div className={styles.formFullWidth}>
+                <Input
+                  label="Key Amenities (Comma separated)"
+                  placeholder="e.g. Infinity Pool, Clubhouse, Gym, Badminton Court, 24/7 Power"
+                  value={editingProperty.amenities || ""}
+                  onChange={(e) => setEditingProperty({ ...editingProperty, amenities: e.target.value })}
+                />
+              </div>
+
+              <div className={styles.formSectionTitle}>
+                <Edit3 size={14} /> Highlights & Overview
+              </div>
+
+              <div className={styles.formFullWidth}>
                 <Textarea
-                  label="Description"
+                  label="Description & Highlights"
                   rows={3}
                   value={editingProperty.description}
                   onChange={(e) => setEditingProperty({ ...editingProperty, description: e.target.value })}
@@ -826,99 +1222,95 @@ export default function PropertiesPage() {
               <Button variant="secondary" type="button" onClick={() => setEditingProperty(null)}>
                 Cancel
               </Button>
-              <Button variant="primary" type="submit" iconLeft={<CheckCircle2 size={16} />}>
-                Save Changes
+              <Button variant="primary" type="submit" disabled={submitting}>
+                {submitting ? "Saving..." : "Save Changes"}
               </Button>
             </div>
           </form>
         </Modal>
       )}
 
-      {/* ── VIEW PROPERTY QUICK DETAILS MODAL ── */}
+      {/* ── EXECUTIVE VIEW PROPERTY DETAILS MODAL ── */}
       {viewingProperty && (
         <Modal
           isOpen={Boolean(viewingProperty)}
           onClose={() => setViewingProperty(null)}
-          title="Property Details"
-          size="md"
+          title={viewingProperty.name}
+          description={viewingProperty.developer ? `${viewingProperty.developer} — ${viewingProperty.location}` : viewingProperty.location}
+          size="lg"
         >
-          <div className={styles.detailSection}>
-            <div
-              className={styles.detailBanner}
-              style={{ background: viewingProperty.bannerGradient }}
-            >
-              <div className={styles.detailBannerOverlay} />
-              <div className={styles.detailTitle}>{viewingProperty.name}</div>
-              <div className={styles.detailSubtitle}>
-                <MapPin size={12} /> {viewingProperty.location}
-              </div>
-            </div>
-
-            <div className={styles.detailGrid}>
-              <div className={styles.detailBox}>
-                <span className={styles.detailLabel}>Property Type</span>
-                <span className={styles.detailValue}>{viewingProperty.type}</span>
-              </div>
-              <div className={styles.detailBox}>
-                <span className={styles.detailLabel}>Starting Price</span>
-                <span className={styles.detailValue}>{viewingProperty.startingPrice}</span>
-              </div>
-              <div className={styles.detailBox}>
-                <span className={styles.detailLabel}>Unit Specs</span>
-                <span className={styles.detailValue}>{viewingProperty.specs}</span>
-              </div>
-              <div className={styles.detailBox}>
-                <span className={styles.detailLabel}>Area Range</span>
-                <span className={styles.detailValue}>{viewingProperty.areaRange}</span>
-              </div>
-              <div className={styles.detailBox}>
-                <span className={styles.detailLabel}>Status</span>
-                <span className={styles.detailValue}>{viewingProperty.status}</span>
-              </div>
-              <div className={styles.detailBox}>
-                <span className={styles.detailLabel}>Possession</span>
-                <span className={styles.detailValue}>{viewingProperty.possessionDate}</span>
-              </div>
-              <div className={styles.detailBox}>
-                <span className={styles.detailLabel}>Total Units</span>
-                <span className={styles.detailValue}>{viewingProperty.totalUnits} Units</span>
-              </div>
-              <div className={styles.detailBox}>
-                <span className={styles.detailLabel}>Available Units</span>
-                <span className={styles.detailValue} style={{ color: "var(--color-primary)" }}>
-                  {viewingProperty.availableUnits} Units Available
+          <div className={styles.viewContainer}>
+            <div className={styles.viewImageHeader}>
+              <img
+                src={viewingProperty.imageUrl || DEFAULT_PROPERTY_IMAGES[0]}
+                alt={viewingProperty.name}
+              />
+              <div className={styles.viewBadgeOverImg}>
+                <span className={`${styles.statusBadge} ${STATUS_CLASS_MAP[normalizeStatus(viewingProperty.status)] || styles.statusUnderConst}`}>
+                  {normalizeStatus(viewingProperty.status)}
+                </span>
+                <span className={styles.typeBadge}>
+                  {viewingProperty.type}
                 </span>
               </div>
             </div>
 
-            <div className={styles.detailBox}>
-              <span className={styles.detailLabel}>Overview & Amenities</span>
-              <p style={{ fontSize: "13px", color: "var(--color-text-secondary)", lineHeight: "1.5", marginTop: "4px" }}>
-                {viewingProperty.description}
-              </p>
+            {viewingProperty.reraId && (
+              <div style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "12px", color: "#059669", background: "#ECFDF5", padding: "6px 12px", borderRadius: "8px" }}>
+                <ShieldCheck size={16} />
+                <span><strong>RERA Reg ID:</strong> {viewingProperty.reraId}</span>
+              </div>
+            )}
+
+            <div className={styles.viewSpecGrid}>
+              <div className={styles.viewSpecCard}>
+                <span className={styles.viewSpecLabel}>Starting Price</span>
+                <span className={styles.viewSpecValue}>{viewingProperty.startingPrice}</span>
+              </div>
+              <div className={styles.viewSpecCard}>
+                <span className={styles.viewSpecLabel}>Unit Inventory</span>
+                <span className={styles.viewSpecValue}>{viewingProperty.availableUnits} / {viewingProperty.totalUnits} Units</span>
+              </div>
+              <div className={styles.viewSpecCard}>
+                <span className={styles.viewSpecLabel}>Possession Date</span>
+                <span className={styles.viewSpecValue}>{viewingProperty.possessionDate}</span>
+              </div>
+              <div className={styles.viewSpecCard}>
+                <span className={styles.viewSpecLabel}>Configurations</span>
+                <span className={styles.viewSpecValue}>{viewingProperty.specs}</span>
+              </div>
+              <div className={styles.viewSpecCard}>
+                <span className={styles.viewSpecLabel}>Super Built-up Area</span>
+                <span className={styles.viewSpecValue}>{viewingProperty.areaRange}</span>
+              </div>
+              <div className={styles.viewSpecCard}>
+                <span className={styles.viewSpecLabel}>Developer</span>
+                <span className={styles.viewSpecValue}>{viewingProperty.developer || "N/A"}</span>
+              </div>
             </div>
 
-            <div style={{ display: "flex", justifyContent: "flex-end", gap: "10px", marginTop: "8px" }}>
-              <Button
-                variant="secondary"
-                size="md"
-                onClick={() => setViewingProperty(null)}
-              >
-                Close
-              </Button>
-              <Button
-                variant="primary"
-                size="md"
-                iconLeft={<Edit3 size={15} />}
-                onClick={() => {
-                  const target = viewingProperty;
-                  setViewingProperty(null);
-                  setEditingProperty({ ...target });
-                }}
-              >
-                Edit Property
-              </Button>
+            {viewingProperty.amenities && (
+              <div style={{ background: "#F8FAFC", border: "1px solid #E2E8F0", borderRadius: "10px", padding: "14px" }}>
+                <strong style={{ fontSize: "12px", color: "#64748B", textTransform: "uppercase", letterSpacing: "0.04em", display: "block", marginBottom: "8px" }}>Key Amenities:</strong>
+                <div className={styles.amenitiesWrap}>
+                  {viewingProperty.amenities.split(",").map((am, aIdx) => (
+                    <span key={aIdx} className={styles.amenityPill}>
+                      {am.trim()}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <div className={styles.viewDescBox}>
+              <strong style={{ color: "#0F172A", display: "block", marginBottom: "6px" }}>Project Description & Highlights:</strong>
+              {viewingProperty.description || "No specific details logged for this property project."}
             </div>
+          </div>
+          <div className={styles.modalFooter}>
+            <Button variant="secondary" onClick={() => setViewingProperty(null)}>
+              Close Detail Sheet
+            </Button>
           </div>
         </Modal>
       )}
@@ -928,21 +1320,16 @@ export default function PropertiesPage() {
         <Modal
           isOpen={Boolean(deletingProperty)}
           onClose={() => setDeletingProperty(null)}
-          title="Delete Property"
-          description={`Are you sure you want to remove "${deletingProperty.name}"? This action cannot be undone.`}
+          title={`Delete "${deletingProperty.name}"?`}
+          description="Are you sure you want to delete this property development from the CRM catalog? Associated stored image files will also be removed."
           size="sm"
         >
-          <div style={{ display: "flex", justifyContent: "flex-end", gap: "10px", marginTop: "16px" }}>
-            <Button variant="secondary" size="md" onClick={() => setDeletingProperty(null)}>
+          <div className={styles.modalFooter}>
+            <Button variant="secondary" onClick={() => setDeletingProperty(null)}>
               Cancel
             </Button>
-            <Button
-              variant="danger"
-              size="md"
-              iconLeft={<Trash2 size={15} />}
-              onClick={handleDeleteConfirm}
-            >
-              Confirm Delete
+            <Button variant="danger" onClick={handleDeleteConfirm}>
+              Delete Property
             </Button>
           </div>
         </Modal>

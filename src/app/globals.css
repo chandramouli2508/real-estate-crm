@@ -7,43 +7,43 @@
    Design Tokens
    ───────────────────────────────────────────────── */
 :root {
-  /* Colors — Brand (Premium Indigo-Slate) */
-  --color-primary:        #4F46E5;
-  --color-primary-hover:  #4338CA;
-  --color-primary-light:  #EEF2FF;
-  --color-primary-muted:  #C7D2FE;
+  /* Colors — Brand (Electric Ocean Blue Theme) */
+  --color-primary:        #0066CC;
+  --color-primary-hover:  #0052A3;
+  --color-primary-light:  #EBF5FF;
+  --color-primary-muted:  #B3D7FF;
 
-  --color-secondary:      #0EA5E9;
-  --color-secondary-hover:#0284C7;
-  --color-secondary-light:#F0F9FF;
-  --color-secondary-muted:#BAE6FD;
+  --color-secondary:      #00B074;
+  --color-secondary-hover:#008C5D;
+  --color-secondary-light:#E6F7F1;
+  --color-secondary-muted:#A3E6CD;
 
   /* Colors — Semantic */
-  --color-success:        #059669;
+  --color-success:        #10B981;
   --color-success-light:  #ECFDF5;
-  --color-success-dark:   #064E3B;
+  --color-success-dark:   #065F46;
   --color-success-muted:  #A7F3D0;
 
-  --color-warning:        #D97706;
+  --color-warning:        #F59E0B;
   --color-warning-light:  #FFFBEB;
-  --color-warning-dark:   #78350F;
+  --color-warning-dark:   #92400E;
   --color-warning-muted:  #FDE68A;
 
-  --color-danger:         #DC2626;
+  --color-danger:         #EF4444;
   --color-danger-light:   #FEF2F2;
-  --color-danger-dark:    #7F1D1D;
+  --color-danger-dark:    #991B1B;
   --color-danger-muted:   #FECACA;
 
-  --color-info:           #0EA5E9;
-  --color-info-light:     #F0F9FF;
-  --color-info-dark:      #0C4A6E;
-  --color-info-muted:     #BAE6FD;
+  --color-info:           #3B82F6;
+  --color-info-light:     #EFF6FF;
+  --color-info-dark:      #1E40AF;
+  --color-info-muted:     #BFDBFE;
 
-  /* Colors — Neutrals (Warm Slate) */
-  --color-bg:             #F8FAFC;
+  /* Colors — Neutrals */
+  --color-bg:             #F4F7FB;
   --color-surface:        #FFFFFF;
-  --color-surface-2:      #F1F5F9;
-  --color-surface-3:      #E2E8F0;
+  --color-surface-2:      #F8FAFC;
+  --color-surface-3:      #F1F5F9;
   --color-border:         #E2E8F0;
   --color-border-strong:  #CBD5E1;
 
@@ -53,14 +53,15 @@
   --color-text-disabled:  #94A3B8;
   --color-text-inverse:   #FFFFFF;
 
-  /* Colors — Sidebar (Deep Slate) */
-  --color-sidebar-bg:     #0F172A;
-  --color-sidebar-text:   #94A3B8;
-  --color-sidebar-active: #F8FAFC;
-  --color-sidebar-active-bg: #1E293B;
-  --color-sidebar-hover-bg:  #1E293B;
-  --color-sidebar-border: #1E293B;
-  --color-sidebar-logo:   #F8FAFC;
+  /* Colors — Sidebar (Exact Electric Ocean Blue matching reference) */
+  --color-sidebar-bg:       #0A63C5;
+  --color-sidebar-bg-dark:  #0851A3;
+  --color-sidebar-text:     #D0E4FF;
+  --color-sidebar-active:   #FFFFFF;
+  --color-sidebar-active-bg:#2584F6;
+  --color-sidebar-hover-bg: rgba(255, 255, 255, 0.12);
+  --color-sidebar-border:   rgba(255, 255, 255, 0.15);
+  --color-sidebar-logo:     #FFFFFF;
 
   /* Typography */
   --font-sans: var(--font-inter, 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif);

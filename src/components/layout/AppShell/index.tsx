@@ -14,12 +14,21 @@ interface AppShellProps {
 
 function AppShell({ children }: AppShellProps) {
   const router = useRouter();
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
+  
+  // Default false on initial render to ensure Server (SSR) and Client (CSR) HTML match 100% during hydration
+  const [sidebarCollapsed, setSidebarCollapsed] = useState<boolean>(false);
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState<boolean>(false);
+  const [isMobile, setIsMobile] = useState<boolean>(false);
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
 
+  // Sync client-only values (localStorage & window dimensions) after hydration completes
   useEffect(() => {
     if (typeof window !== "undefined") {
+      const savedCollapsed = localStorage.getItem("propflow_sidebar_collapsed");
+      if (savedCollapsed === "true") {
+        setSidebarCollapsed(true);
+      }
+
       const token = localStorage.getItem("token");
       if (!token) {
         setIsAuthenticated(false);
@@ -27,22 +36,38 @@ function AppShell({ children }: AppShellProps) {
       } else {
         setIsAuthenticated(true);
       }
+
+      const checkMobile = () => {
+        const mobile = window.innerWidth <= 768;
+        setIsMobile(mobile);
+        if (!mobile) {
+          setMobileSidebarOpen(false);
+        }
+      };
+
+      checkMobile();
+      window.addEventListener("resize", checkMobile);
+      return () => window.removeEventListener("resize", checkMobile);
     }
   }, [router]);
 
   function toggleSidebar() {
-    // On tablet+, collapse/expand; on mobile open/close
-    if (window.innerWidth <= 768) {
+    if (typeof window !== "undefined" && window.innerWidth <= 768) {
       setMobileSidebarOpen((v) => !v);
     } else {
-      setSidebarCollapsed((v) => !v);
+      setSidebarCollapsed((prev) => {
+        const nextState = !prev;
+        if (typeof window !== "undefined") {
+          localStorage.setItem("propflow_sidebar_collapsed", String(nextState));
+        }
+        return nextState;
+      });
     }
   }
 
-  // Prevent flash of protected content while checking auth
-  if (isAuthenticated !== true) {
+  if (isAuthenticated === false) {
     return (
-      <div style={{ minHeight: "100vh", width: "100vw", backgroundColor: "var(--color-bg, #0F172A)" }} />
+      <div style={{ minHeight: "100vh", width: "100vw", backgroundColor: "var(--color-bg, #F4F7FB)" }} />
     );
   }
 
@@ -63,6 +88,8 @@ function AppShell({ children }: AppShellProps) {
           <Sidebar
             collapsed={sidebarCollapsed}
             onToggle={toggleSidebar}
+            onMobileClose={() => setMobileSidebarOpen(false)}
+            isMobile={isMobile}
           />
         </div>
 

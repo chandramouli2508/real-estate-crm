@@ -64,10 +64,24 @@ async function initSchema() {
       "availableUnits" INTEGER NOT NULL DEFAULT 0,
       "possessionDate" TEXT,
       "bannerGradient" TEXT,
+      "imageUrl" TEXT,
+      "imagePublicId" TEXT,
+      "developer" TEXT,
+      "reraId" TEXT,
+      "amenities" TEXT,
       "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
       "updatedAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
     );
   `);
+  // Ensure new columns exist for existing Turso tables
+  const alterColumns = ["imageUrl", "imagePublicId", "developer", "reraId", "amenities"];
+  for (const col of alterColumns) {
+    try {
+      await prisma.$executeRawUnsafe(`ALTER TABLE "properties" ADD COLUMN "${col}" TEXT;`);
+    } catch (_) {
+      // Column already exists
+    }
+  }
   await prisma.$executeRawUnsafe(`
     CREATE TABLE IF NOT EXISTS "bookings" (
       "id" TEXT NOT NULL PRIMARY KEY,

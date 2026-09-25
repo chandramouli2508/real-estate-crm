@@ -57,10 +57,12 @@ function Modal({
       <div className={cn(styles.modal, styles[size])}>
         {(title || description) && (
           <div className={styles.header}>
-            {title && <h2 className={styles.title}>{title}</h2>}
-            {description && <p className={styles.description}>{description}</p>}
+            <div className={styles.titleContainer}>
+              {title && <h2 className={styles.title}>{title}</h2>}
+              {description && <p className={styles.description}>{description}</p>}
+            </div>
             <button className={styles.closeBtn} onClick={onClose} aria-label="Close modal">
-              <X size={20} strokeWidth={1.8} />
+              <X size={18} strokeWidth={2} />
             </button>
           </div>
         )}

@@ -95,6 +95,23 @@ const STAGE_BADGE_VARIANT: Record<StageType, "info" | "primary" | "secondary" | 
   Lost: "danger",
 };
 
+const STAGE_CLASS_MAP: Record<StageType, string> = {
+  New: styles.stageNew,
+  Contacted: styles.stageContacted,
+  "Site Visit": styles.stageSiteVisit,
+  Interested: styles.stageInterested,
+  Negotiation: styles.stageNegotiation,
+  Booked: styles.stageBooked,
+  Lost: styles.stageLost,
+};
+
+const getInitials = (name: string) => {
+  if (!name) return "??";
+  const parts = name.trim().split(" ");
+  if (parts.length >= 2) return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
+  return name.slice(0, 2).toUpperCase();
+};
+
 const SOURCE_ICONS: Record<SourceType, React.ReactNode> = {
   Website: <Globe size={13} strokeWidth={1.8} />,
   "99acres": <Home size={13} strokeWidth={1.8} />,
@@ -538,24 +555,24 @@ export default function LeadsPage() {
   return (
     <AppShell>
       <div className={styles.container}>
-        {/* ── REUSABLE PAGE HEADER ── */}
-        <PageHeader
-          title="Leads Management"
-          subtitle="Track, manage, and engage prospective buyers across all property developments."
-          actions={
-            <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
-              <Button
-                variant="secondary"
-                size="md"
-                iconLeft={<RefreshCw size={15} className={loading ? "animate-spin" : ""} />}
-                onClick={handleRefresh}
-              >
-                Sync
-              </Button>
-              <Button
-                variant="primary"
-                size="md"
-                iconLeft={<Plus size={16} strokeWidth={2} />}
+        {/* ── OCEAN BLUE HERO WELCOME BANNER ── */}
+        <section className={styles.heroBanner}>
+          <div className={styles.heroHeader}>
+            <div className={styles.heroTitleGroup}>
+              <h1 className={styles.heroTitle}>
+                Lead Management
+              </h1>
+              <p className={styles.heroSubtitle}>
+                Track, manage, and engage prospective buyers across all property developments
+              </p>
+            </div>
+
+            <div className={styles.heroRightControls}>
+              <button className={styles.heroBtn} onClick={handleRefresh}>
+                <RefreshCw size={14} className={loading ? "animate-spin" : ""} /> Sync Database
+              </button>
+              <button
+                className={styles.heroPrimaryBtn}
                 onClick={() => {
                   setFormData({
                     customerName: "",
@@ -572,11 +589,52 @@ export default function LeadsPage() {
                   setIsAddModalOpen(true);
                 }}
               >
-                Add Lead
-              </Button>
+                <Plus size={16} /> Add Lead
+              </button>
             </div>
-          }
-        />
+          </div>
+
+          {/* Integrated Hero KPI Grid */}
+          <div className={styles.heroKpiGrid}>
+            <div className={styles.heroKpiCard}>
+              <div className={styles.heroKpiHeader}>
+                <div className={styles.heroKpiIcon}><Users size={14} /></div>
+                Total Leads
+              </div>
+              <div className={styles.heroKpiValue}>{leads.length}</div>
+              <div className={styles.heroKpiTrend}>+14% this month</div>
+            </div>
+
+            <div className={styles.heroKpiCard}>
+              <div className={styles.heroKpiHeader}>
+                <div className={styles.heroKpiIcon}><UserCheck size={14} /></div>
+                New Inquiries
+              </div>
+              <div className={styles.heroKpiValue}>{leads.filter(l => l.stage === "New").length}</div>
+              <div className={styles.heroKpiTrend}>+9% from yesterday</div>
+            </div>
+
+            <div className={styles.heroKpiCard}>
+              <div className={styles.heroKpiHeader}>
+                <div className={styles.heroKpiIcon}><Home size={14} /></div>
+                Site Visits
+              </div>
+              <div className={styles.heroKpiValue}>{leads.filter(l => l.stage === "Site Visit").length}</div>
+              <div className={styles.heroKpiTrend}>+18% this week</div>
+            </div>
+
+            <div className={styles.heroKpiCard}>
+              <div className={styles.heroKpiHeader}>
+                <div className={styles.heroKpiIcon}><CheckCircle2 size={14} /></div>
+                Booked Deals
+              </div>
+              <div className={styles.heroKpiValue}>{leads.filter(l => l.stage === "Booked").length}</div>
+              <div className={styles.heroKpiTrend}>+22% conversion</div>
+            </div>
+          </div>
+        </section>
+
+
 
         {/* ── REUSABLE RESPONSIVE FILTER TOOLBAR ── */}
         <FilterToolbar
@@ -716,8 +774,10 @@ export default function LeadsPage() {
                       {/* Customer */}
                       <td className={styles.td}>
                         <div className={styles.customerCell}>
-                          <Avatar name={lead.customerName} size="sm" />
-                          <div>
+                          <div className={styles.customerAvatar}>
+                            {getInitials(lead.customerName)}
+                          </div>
+                          <div className={styles.customerInfo}>
                             <div className={styles.customerName}>{lead.customerName}</div>
                             <div className={styles.customerEmail}>{lead.email}</div>
                           </div>
@@ -739,17 +799,20 @@ export default function LeadsPage() {
                         </span>
                       </td>
 
-                      {/* Stage Badge */}
+                      {/* Stage Badge with Glowing Dot */}
                       <td className={styles.td}>
-                        <Badge variant={STAGE_BADGE_VARIANT[lead.stage] ?? "neutral"} size="sm" dot>
+                        <span className={`${styles.stageBadge} ${STAGE_CLASS_MAP[lead.stage] || styles.stageNew}`}>
+                          <span className={styles.badgeDot} />
                           {lead.stage}
-                        </Badge>
+                        </span>
                       </td>
 
                       {/* Assigned Agent */}
                       <td className={styles.td}>
                         <div className={styles.agentCell}>
-                          <Avatar name={lead.agent} size="xs" />
+                          <div className={styles.agentAvatar}>
+                            {getInitials(lead.agent)}
+                          </div>
                           <span className={styles.agentName}>{lead.agent}</span>
                         </div>
                       </td>
@@ -762,7 +825,7 @@ export default function LeadsPage() {
                       {/* Follow-up */}
                       <td className={styles.td}>
                         <div className={styles.followUpCell}>
-                          {lead.urgent && <span className={styles.urgentDot} title="Urgent" />}
+                          {lead.urgent && <span className={styles.urgentDot} title="Urgent Follow-up" />}
                           <span>{lead.followUp}</span>
                         </div>
                       </td>
